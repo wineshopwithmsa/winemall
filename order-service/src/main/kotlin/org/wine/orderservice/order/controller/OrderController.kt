@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/order")
 class OrderController {
     @GetMapping("/v1")
-    fun getUsers(): ResponseEntity<ApiResponse<Any>> {
-
-        val response = ApiResponse.Success(status = 200, message = "test mesasge", data = "test data")
-        return ResponseEntity.ok(response)
+    fun getUsers(): ApiResponse<Any> {
+        return ApiResponse.Success(data = "test data")
     }
 }
