@@ -18,7 +18,7 @@ import org.wine.userservice.user.jwt.JwtService
 import org.wine.userservice.user.service.MemberService
 
 @RestController
-@RequestMapping("/user-service/api/member")
+@RequestMapping("/api/member")
 class MemberController {
     @Autowired lateinit var memberService: MemberService
 
