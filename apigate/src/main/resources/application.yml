@@ -8,6 +8,16 @@ spring:
     name: apigate
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: '*'
+            allowedMethods:
+              - POST
+              - GET
+              - PUT
+              - OPTIONS
+              - DELETE
       #      httpclient:
       #        connect-timeout: 2000
       #        response-timeout: 2s
@@ -20,9 +30,13 @@ spring:
           filters:
             - CustomFilter
             - RewritePath=/order-service/(?<segment>.*), /$\{segment}
-
         - id: user-service
           uri: lb://USER-SERVICE
+          filters:
+            - AuthorizationHeaderFilter
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - CustomFilter
           predicates:
             - Path=/user-service/**
 
