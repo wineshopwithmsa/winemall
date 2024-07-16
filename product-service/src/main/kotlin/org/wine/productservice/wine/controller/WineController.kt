@@ -1,17 +1,16 @@
-package org.wine.productservice.product.controller
+package org.wine.productservice.wine.controller
 
-import com.netflix.discovery.converters.Auto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.wine.productservice.product.service.JwtTokenProvider
+import org.wine.productservice.wine.service.JwtTokenProvider
 
 @RestController
-@RequestMapping("/api/product")
-class ProductController {
+@RequestMapping("/api/wines")
+class WineController {
     @Autowired lateinit var jwtTokenProvider: JwtTokenProvider
 
     @GetMapping("/v1")

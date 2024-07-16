@@ -1,4 +1,4 @@
-package org.wine.productservice.product.service
+package org.wine.productservice.wine.service
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
