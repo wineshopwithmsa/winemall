@@ -13,6 +13,11 @@ import org.wine.productservice.wine.service.JwtTokenProvider
 class WineController {
     @Autowired lateinit var jwtTokenProvider: JwtTokenProvider
 
+    @GetMapping("/health")
+    fun health(): String {
+        return "ok";
+    }
+
     @GetMapping("/v1")
     fun getTest(@RequestHeader headers: HttpHeaders): String {
         val authorizationHeader = headers.getFirst(HttpHeaders.AUTHORIZATION)
