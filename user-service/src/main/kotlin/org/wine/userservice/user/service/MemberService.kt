@@ -64,10 +64,13 @@ class MemberService {
         if (authentication != null) {
             if (authentication.isAuthenticated) {
                 //            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequestDTO.getUsername());
-                return ApiResponse.Success(data= JwtResponseDTO(
-                    accessToken = jwtService.generateToken(authRequestDTO.email)
-                )
-                )
+                var member = memberRepository.findByEmail(authRequestDTO.email)
+                if (member != null) {
+                        return ApiResponse.Success(data= JwtResponseDTO(
+                            accessToken = jwtService.generateToken(member.getUserId().toString())
+                        )
+                    )
+                }
             } else {
                 throw UsernameNotFoundException("user not found")
             }
