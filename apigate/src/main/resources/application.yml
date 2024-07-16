@@ -21,9 +21,15 @@ spring:
           predicates:
             - Path=/product-service/**
           filters:
+            - RemoveRequestHeader=Cookie
             - AuthorizationHeaderFilter
             - RewritePath=/product-service/(?<segment>.*), /$\{segment}
             - CustomFilter
+            - name: AuthorizationHeaderFilter
+              args:
+                headerName: Authorization
+                granted: Bearer
+
 #      routes:
 #        - id: order-service
 #          uri: lb://ORDER-SERVICE

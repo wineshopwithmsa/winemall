@@ -17,7 +17,7 @@ class Member(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", nullable = false)
-    private val userId: Long? = null,
+    private val userId: Long = 0L,
 
     @Column(name = "email", nullable = false)
     private val email: String = "",
@@ -27,7 +27,6 @@ class Member(
 
     @Column(name = "nickname")
     private val nickName: String? = null,
-
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -39,7 +38,7 @@ class Member(
 ) {
     constructor() : this(email = "", password = "")
 
-
+    fun getUserId(): Long = userId
     fun getEmail(): String = email
     fun getPassword(): String = password
     fun getNickName(): String? = nickName
