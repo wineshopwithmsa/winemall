@@ -1,8 +1,5 @@
-package org.wine.userservice.user.dto
+package org.wine.userservice.user.dto.request
 
-import lombok.AllArgsConstructor
-import lombok.Getter
-import lombok.NoArgsConstructor
 import java.io.Serializable
 
 data class RequestLoginUserDto(

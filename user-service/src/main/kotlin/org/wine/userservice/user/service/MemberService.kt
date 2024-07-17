@@ -1,7 +1,6 @@
 package org.wine.userservice.user.service
 
 import ApiResponse
-import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -9,10 +8,10 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
-import org.wine.userservice.user.dto.JwtResponseDTO
-import org.wine.userservice.user.dto.RequestLoginUserDto
-import org.wine.userservice.user.dto.UserRequestDto
-import org.wine.userservice.user.dto.UserResponseDto
+import org.wine.userservice.user.dto.response.JwtResponseDTO
+import org.wine.userservice.user.dto.request.RequestLoginUserDto
+import org.wine.userservice.user.dto.request.UserRequestDto
+import org.wine.userservice.user.dto.response.MemberResponseDto
 import org.wine.userservice.user.entity.Member
 import org.wine.userservice.user.entity.MemberRole
 import org.wine.userservice.user.jwt.JwtService
@@ -24,13 +23,13 @@ class MemberService {
     @Autowired lateinit var authenticationManager: AuthenticationManager
     @Autowired lateinit var jwtService: JwtService
 
-    fun saveUser(userRequest: UserRequestDto?): UserResponseDto {
+    fun saveUser(userRequest: UserRequestDto): MemberResponseDto {
 
 //        User user = User.fromRequestDto(userRequest);
         val encoder = BCryptPasswordEncoder()
         val userRole = MemberRole().apply {
             id = 1
-            name = "ROLE_USER"
+            name = userRequest.role
         }
 
         val roleSet = mutableSetOf(userRole)
@@ -51,7 +50,7 @@ class MemberService {
         println(user.toString())
 
         val rtnUser = memberRepository?.save(user)
-        return UserResponseDto.fromResponseDtoUser(rtnUser!!)
+        return MemberResponseDto.fromResponseDtoUser(rtnUser!!)
     }
 
     fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
@@ -76,5 +75,12 @@ class MemberService {
             }
         }
         return ApiResponse.Success(data="")
+    }
+
+    fun getUserInfo(memberId: Long): MemberResponseDto {
+        val userInfo = memberRepository.findById(memberId).orElseThrow {
+            throw NoSuchElementException("존재하지 않는 유저입니다")
+        }
+        return MemberResponseDto.fromResponseDtoUser(userInfo)
     }
 }
