@@ -15,7 +15,7 @@ class MemberRole(
     var id: Long = 0,
 
     @Column(name = "name")
-    var name: String? = null
+    var name: String
 ) {
-    constructor() : this(0, null)
+    constructor() : this(0, "ROLE_USER")
 }
