@@ -29,7 +29,13 @@ spring:
               args:
                 headerName: Authorization
                 granted: Bearer
-
+        - id: coupon-service
+          uri: lb://COUPON-SERVICE
+          predicates:
+            - Path=/coupon-service/**
+          filters:
+            - RewritePath=/coupon-service/(?<segment>.*), /$\{segment}
+            - CustomFilter
 #      routes:
 #        - id: order-service
 #          uri: lb://ORDER-SERVICE
