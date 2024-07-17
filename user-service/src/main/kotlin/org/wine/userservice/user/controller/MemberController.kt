@@ -13,32 +13,30 @@ import org.wine.userservice.user.service.MemberService
 
 @RestController
 @RequestMapping("/api/member")
-class MemberController {
-    @Autowired lateinit var memberService: MemberService
-    @Autowired lateinit var userCommon: UserCommon
-
+class MemberController @Autowired constructor(
+    private val memberService: MemberService,
+    private val userCommon: UserCommon
+) {
     @PostMapping("/v1/save")
-    fun saveUser(@RequestBody userRequest: UserRequestDto): ResponseEntity<*> {
-        try {
-            val userResponse: MemberResponseDto = memberService.saveUser(userRequest) ;
-            return ResponseEntity.ok<Any>(userResponse)
+    fun signUp(@RequestBody userRequest: UserRequestDto): ResponseEntity<MemberResponseDto> {
+        return try {
+            val userResponse = memberService.signUp(userRequest)
+            ResponseEntity.ok(userResponse)
         } catch (e: Exception) {
             e.printStackTrace()
-            throw RuntimeException(e)
+            ResponseEntity.status(500).build()
         }
     }
-    @GetMapping("/v1")
-    fun getUser():String{
-        return "Test"
-    }
+
     @PostMapping("/v1/login")
-    fun AuthenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+    fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
         return memberService.toLogin(authRequestDTO)
     }
+
     @GetMapping("/v1/info")
-    fun getUserInfo(@RequestHeader headers: HttpHeaders): ApiResponse<Any>{
-        val result = userCommon.getJwtAccount(headers).toLong()
-        return ApiResponse.Success(data = memberService.getUserInfo(result))
+    fun getUserInfo(@RequestHeader headers: HttpHeaders): ApiResponse<Any> {
+        val userId = userCommon.getJwtAccount(headers).toLong()
+        return ApiResponse.Success(data = memberService.getUserInfo(userId))
     }
 
 }

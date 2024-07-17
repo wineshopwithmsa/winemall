@@ -18,39 +18,28 @@ import org.wine.userservice.user.jwt.JwtService
 import org.wine.userservice.user.repository.MemberRepository
 
 @Service
-class MemberService {
-    @Autowired lateinit var memberRepository: MemberRepository
-    @Autowired lateinit var authenticationManager: AuthenticationManager
-    @Autowired lateinit var jwtService: JwtService
-
-    fun saveUser(userRequest: UserRequestDto): MemberResponseDto {
-
-//        User user = User.fromRequestDto(userRequest);
+class MemberService @Autowired constructor(
+    private val memberRepository: MemberRepository,
+    private val authenticationManager: AuthenticationManager,
+    private val jwtService: JwtService
+){
+    fun signUp(userRequest: UserRequestDto): MemberResponseDto {
         val encoder = BCryptPasswordEncoder()
         val userRole = MemberRole().apply {
             id = if (userRequest.role == "ROLE_USER") 1 else 2
             name = userRequest.role
         }
-
         val roleSet = mutableSetOf(userRole)
-
         val encodedPassword = encoder.encode(userRequest?.password ?: "")
 
-//        val user = Member().apply {
-//            email = userRequest?.email!!
-//            password = encodedPassword
-//            roles = roleSet
-//        }
         val user = Member(
             email = userRequest?.email!!,
             password = encodedPassword,
             nickName = userRequest.nickName,
             roles = roleSet
         )
-        println(user.toString())
-
-        val rtnUser = memberRepository?.save(user)
-        return MemberResponseDto.fromResponseDtoUser(rtnUser!!)
+        val rtnUser = memberRepository.save(user)
+        return MemberResponseDto.fromResponseDtoUser(rtnUser)
     }
 
     fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
