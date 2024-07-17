@@ -28,7 +28,7 @@ class MemberService {
 //        User user = User.fromRequestDto(userRequest);
         val encoder = BCryptPasswordEncoder()
         val userRole = MemberRole().apply {
-            id = 1
+            id = if (userRequest.role == "ROLE_USER") 1 else 2
             name = userRequest.role
         }
 

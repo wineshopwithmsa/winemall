@@ -20,7 +20,7 @@ class MemberController {
     @PostMapping("/v1/save")
     fun saveUser(@RequestBody userRequest: UserRequestDto): ResponseEntity<*> {
         try {
-            val userResponse: MemberResponseDto? = memberService?.saveUser(userRequest) ;
+            val userResponse: MemberResponseDto = memberService.saveUser(userRequest) ;
             return ResponseEntity.ok<Any>(userResponse)
         } catch (e: Exception) {
             e.printStackTrace()
