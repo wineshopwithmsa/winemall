@@ -32,7 +32,7 @@ class WineMapperTest {
             TestData.createWineCategory(id = 2L, category = category2)
         )
         val wine = TestData.createWine().apply {
-            this.category = categories as MutableSet<WineCategory>
+            this.categories = categories as MutableSet<WineCategory>
         }
 
         // When

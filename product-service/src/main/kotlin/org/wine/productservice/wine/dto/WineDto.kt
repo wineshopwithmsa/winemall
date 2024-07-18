@@ -22,7 +22,7 @@ data class WineDto(
                     description = wine.description,
                     alcoholPercentage = wine.alcoholPercentage,
                     region = wine.region.let { RegionDto.fromRegion(it) },
-                    categories = wine.category.map { CategoryDto.fromCategory(it.category) }.toSet()
+                    categories = wine.categories.map { CategoryDto.fromCategory(it.category) }.toSet()
                 )
             }
         }

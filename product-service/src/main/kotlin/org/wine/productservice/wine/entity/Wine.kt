@@ -44,16 +44,15 @@ class Wine(
     @Column(name = "updated_at", nullable = true)
     var updatedAt: Instant? = null,
 
-    // TODO: 단수형 사용이 맞나 검토.
     @OneToMany(mappedBy = "wine", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
-    var category: MutableSet<WineCategory> = mutableSetOf()
+    var categories: MutableSet<WineCategory> = mutableSetOf()
 ) {
     fun tagWithCategories(newCategories: Set<Category>) {
-        category.removeIf { it.category !in newCategories }
+        categories.removeIf { it.category !in newCategories }
 
-        newCategories.forEach { c ->
-            if (category.none { it.category == c }) {
-                category.add(WineCategory(wine = this, category = c))
+        newCategories.forEach { category ->
+            if (categories.none { it.category == category }) {
+                categories.add(WineCategory(wine = this, category = category))
             }
         }
     }

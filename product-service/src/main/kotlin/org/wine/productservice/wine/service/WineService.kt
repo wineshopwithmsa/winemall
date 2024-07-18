@@ -73,16 +73,16 @@ class WineService @Autowired constructor(
             val newCategories = getCategoriesFromIds(newCategoryIds)
 
             // 기존 카테고리 중 새로운 카테고리 목록에 없는 것들 삭제
-            val categoriesToRemove = wine.category.filter { existingCategory ->
+            val categoriesToRemove = wine.categories.filter { existingCategory ->
                 newCategories.none { it.categoryId == existingCategory.category.categoryId }
             }
             wineCategoryRepository.deleteAll(categoriesToRemove)
-            wine.category -= categoriesToRemove.toSet()
+            wine.categories -= categoriesToRemove.toSet()
 
             newCategories.forEach { category ->
-                if (wine.category.none { it.category.categoryId == category.categoryId }) {
+                if (wine.categories.none { it.category.categoryId == category.categoryId }) {
                     val newWineCategory = WineCategory(wine = wine, category = category)
-                    wine.category += newWineCategory
+                    wine.categories += newWineCategory
                 }
             }
         }
