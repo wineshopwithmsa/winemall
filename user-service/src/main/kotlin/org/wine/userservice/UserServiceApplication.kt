@@ -2,10 +2,11 @@ package org.wine.userservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.cloud.openfeign.EnableFeignClients
 import org.springframework.context.annotation.PropertySource
 
 @SpringBootApplication
-//@PropertySource("classpath:application.yml")
+@EnableFeignClients
 class UserServiceApplication
 
 fun main(args: Array<String>) {
