@@ -13,19 +13,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-# NOTE: < 테스트 데이터 추가 >
-#      ddl-auto: create-drop
     properties:
       hibernate:
         show_sql: true
         format_sql: true
         use_sql_comments: true
-# NOTE: < 테스트 데이터 추가 >
-#    defer-datasource-initialization: true
-#  sql:
-#    init:
-#      mode: always
-#      data-locations: classpath:testdata.sql
 
 eureka:
   client:
@@ -35,9 +27,3 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
-logging:
-  level:
-    root: DEBUG
-    org.springframework: DEBUG
-    org.wine: DEBUG  # 귀하의 애플리케이션 패키지
-
