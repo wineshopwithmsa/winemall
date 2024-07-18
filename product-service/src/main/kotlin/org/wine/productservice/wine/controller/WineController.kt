@@ -10,10 +10,13 @@ import jwt.JwtTokenProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.wine.productservice.wine.dto.WineRequestDto
+import org.wine.productservice.wine.dto.WineCreateRequestDto
 import org.wine.productservice.wine.dto.WineDto
+import org.wine.productservice.wine.dto.WineUpdateRequestDto
 import org.wine.productservice.wine.service.WineService
 
 
@@ -28,7 +31,7 @@ class WineController @Autowired constructor(
     }
 
     @PostMapping("/v1")
-    fun createWine(@RequestBody requestDto: WineRequestDto): ResponseEntity<ApiResponse<Any>> {
+    fun createWine(@RequestBody requestDto: WineCreateRequestDto): ResponseEntity<ApiResponse<Any>> {
         val wine = wineService.addWine(requestDto)
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.Success(status = 201, message = "Created", data = mapOf("wine" to wine)))
@@ -38,6 +41,12 @@ class WineController @Autowired constructor(
     fun getWines(@RequestHeader headers: HttpHeaders): ResponseEntity<ApiResponse<Any>> {
         val wines: List<WineDto>? = wineService.getWinesForSeller()
         return ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = mapOf("wines" to wines)))
+    }
+
+    @PatchMapping("/v1/{wineId}")
+    fun updateWine(@PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ResponseEntity<ApiResponse<Any>> {
+        val wine = wineService.updateWine(wineId, requestDto)
+        return ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = mapOf("wine" to wine)))
     }
 
     @GetMapping("/test/v1")

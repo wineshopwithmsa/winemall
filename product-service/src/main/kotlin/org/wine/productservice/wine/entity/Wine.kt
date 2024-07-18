@@ -1,6 +1,5 @@
 package org.wine.productservice.wine.entity
 
-import java.math.BigDecimal
 import java.time.Instant
 import jakarta.persistence.*
 import lombok.Getter
@@ -8,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.math.BigDecimal
 
 @Entity
 @Table(name = "wine")
@@ -46,12 +46,15 @@ class Wine(
 
     // TODO: 단수형 사용이 맞나 검토.
     @OneToMany(mappedBy = "wine", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
-    var category: Set<WineCategory> = emptySet()
+    var category: MutableSet<WineCategory> = mutableSetOf()
 ) {
-    fun tagWithCategories(categories: Set<Category>) {
-        this.category = categories.map { WineCategory(
-            wine = this,
-            category = it,
-        ) }.toSet()
+    fun tagWithCategories(newCategories: Set<Category>) {
+        category.removeIf { it.category !in newCategories }
+
+        newCategories.forEach { c ->
+            if (category.none { it.category == c }) {
+                category.add(WineCategory(wine = this, category = c))
+            }
+        }
     }
 }

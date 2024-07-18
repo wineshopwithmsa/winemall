@@ -2,23 +2,20 @@ package org.wine.productservice.wine.service
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mapstruct.factory.Mappers
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.dto.CategoryDto
-import org.wine.productservice.wine.dto.RegionDto
-import org.wine.productservice.wine.dto.WineDto
-import org.wine.productservice.wine.dto.WineRequestDto
+import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
 import org.wine.productservice.wine.entity.Region
 import org.wine.productservice.wine.entity.Wine
 import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.repository.CategoryRepository
 import org.wine.productservice.wine.repository.RegionRepository
+import org.wine.productservice.wine.repository.WineCategoryRepository
 import org.wine.productservice.wine.repository.WineRepository
 import java.math.BigDecimal
 import java.time.Instant
@@ -37,7 +34,10 @@ class WineServiceTest {
     private lateinit var categoryRepository: CategoryRepository
 
     @Mock
-    private lateinit var wineMapper: WineMapper
+    private lateinit var wineCategoryRepository: WineCategoryRepository
+
+    @Mock
+    private var wineMapper: WineMapper = Mappers.getMapper(WineMapper::class.java)
 
     @Mock
     private lateinit var authService: AuthService
@@ -48,7 +48,7 @@ class WineServiceTest {
     @Test
     fun `addWine - 유효한 RequestDto가 들어오면 와인을 저장하고 WineDto 반환`() {
         // Given
-        val wineRequestDto = WineRequestDto(
+        val wineRequestDto = WineCreateRequestDto(
             name="Test Wine",
             description = "Description",
             regionId = 1L,
@@ -78,7 +78,7 @@ class WineServiceTest {
             description = "Description",
             BigDecimal("12.34"),
             region = RegionDto(1L, "Test Region"),
-            category =  mockCategories.map {category -> CategoryDto.fromCategory(category) }.toSet(),
+            categories =  mockCategories.map { category -> CategoryDto.fromCategory(category) }.toSet(),
         )
 
         val nonNullCategoryIds = wineRequestDto.categoryIds ?: emptySet<Long>()
@@ -95,6 +95,61 @@ class WineServiceTest {
         // Then
         verify(wineRepository).save(mockWine)
         verify(wineMapper).toWineDto(mockWine)
+        assert(result == expectedWineDto)
+    }
+
+    @Test
+    fun `updateWine - 유효한 RequestDto가 들어오면 와인을 수정하고 wineDto 반환`() {
+        // Given
+        val wineId = 1L
+        val mockRegion = Region(1L, "Old Region", Instant.now())
+        val existingWine = Wine(
+            wineId = wineId,
+            name = "Old Name",
+            description = "Old Description",
+            alcoholPercentage = BigDecimal.TEN,
+            region = mockRegion,
+            registrantId = 1L
+        )
+        val updatedRegion = Region(2L, "Updated Region", Instant.now())
+        val updatedCategories = setOf(Category(3L, "Updated Category"))
+        val requestDto = WineUpdateRequestDto(
+            name = "Updated Name",
+            description = "Updated Description",
+            alcoholPercentage = BigDecimal.valueOf(12.34),
+            regionId = 2L,
+            categoryIds = setOf(3L)
+        )
+        val expectedWineDto = WineDto(
+            id = wineId,
+            name = "Updated Name",
+            description = "Updated Description",
+            alcoholPercentage = BigDecimal.valueOf(12.34),
+            region = RegionDto(2L, "Updated Region"),
+            categories = setOf(CategoryDto(3L, "Updated Category")),
+        )
+
+        `when`(wineRepository.findById(wineId)).thenReturn(Optional.of(existingWine))
+        `when`(regionRepository.findById(2L)).thenReturn(Optional.of(updatedRegion))
+        // Adjusted to reflect the behavior of being called twice
+        `when`(categoryRepository.findAllById(setOf(3L))).thenReturn(
+            updatedCategories.toList(),
+            updatedCategories.toList()
+        )
+        `when`(wineRepository.save(any(Wine::class.java))).thenAnswer { it.arguments[0] }
+        `when`(wineMapper.toWineDto(existingWine)).thenReturn(expectedWineDto)
+
+        // When
+        val result = wineService.updateWine(wineId, requestDto)
+
+        // Then
+        verify(wineRepository).findById(wineId)
+        verify(regionRepository).findById(2L)
+        // Verify findAllById was called twice
+        verify(categoryRepository, times(2)).findAllById(setOf(3L))
+        verify(wineCategoryRepository).deleteAll(anyCollection())
+        verify(wineRepository).save(any(Wine::class.java))
+
         assert(result == expectedWineDto)
     }
 }
