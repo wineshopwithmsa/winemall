@@ -2,10 +2,11 @@ package org.wine.productservice.wine.entity
 
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
 import jakarta.persistence.*
 import lombok.Getter
 import org.hibernate.annotations.ColumnDefault
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
@@ -22,44 +23,35 @@ class Wine(
     @JoinColumn(name = "region_id", nullable = false)
     var region: Region,
 
-    @Column(name = "wine_uuid", nullable = false)
-    val uuid: UUID = UUID.randomUUID(),
-
     @Column(name = "name", nullable = false)
-    var name: String = "",
+    var name: String,
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
-    var description: String = "",
+    var description: String,
 
     @Column(name = "alcohol_percentage", nullable = false, precision = 3, scale = 1)
     @ColumnDefault("0.0")
     var alcoholPercentage: BigDecimal,
 
-    // TODO: 와인 판매자 정보 타입 결정 (Long or UUID)
-    // 데이터베이스에만 우선 저장? 반환할 때는 필요하지 않을 것 같음
     @Column(name = "registrant_id", nullable = false)
-    var registrantId: Long,
+    var registrantId: Long = 0L,
 
-    @Column(name = "created_at", nullable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: Instant = Instant.now(),
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = true)
     var updatedAt: Instant? = null,
 
-    @Column(name = "deleted_at", nullable = true)
-    var deletedAt: Instant? = null,
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "wine_category",
-        joinColumns = [JoinColumn(name = "wine_id")],
-        inverseJoinColumns = [JoinColumn(name = "category_id")]
-    )
-    var categories: Set<Category> = emptySet()
+    // TODO: 단수형 사용이 맞나 검토.
+    @OneToMany(mappedBy = "wine", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
+    var category: Set<WineCategory> = emptySet()
 ) {
-    constructor() : this(
-        region = Region(),
-        alcoholPercentage = BigDecimal.ZERO,
-        registrantId = 0L
-    )
+    fun tagWithCategories(categories: Set<Category>) {
+        this.category = categories.map { WineCategory(
+            wine = this,
+            category = it,
+        ) }.toSet()
+    }
 }

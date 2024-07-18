@@ -2,6 +2,7 @@ package org.wine.productservice.auth
 
 import jwt.JwtTokenProvider
 import org.springframework.stereotype.Service
+import org.wine.productservice.wine.exception.UnauthorizedException
 
 @Service
 class AuthService(
@@ -9,16 +10,15 @@ class AuthService(
 ) {
     private val jwtTokenProvider: JwtTokenProvider = JwtTokenProvider()
 
-    fun getAccountInfo(): String {
+    fun getAccountId(): Long {
         val token = tokenExtractor.extract()
-        return if (token != null) {
-            try {
-                return jwtTokenProvider.getAccount(token)
-            } catch (e: Exception) {
-                "Invalid JWT"
-            }
-        } else {
-            "JWT is not present"
+            ?: throw UnauthorizedException("JWT is not present")
+
+        return try {
+            val accountId = jwtTokenProvider.getAccount(token)
+            accountId.toLongOrNull() ?: throw IllegalArgumentException("Invalid account ID")
+        } catch (e: Exception) {
+            throw UnauthorizedException("Invalid JWT")
         }
     }
 }

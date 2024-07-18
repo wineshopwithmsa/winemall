@@ -5,17 +5,15 @@ import java.io.Serializable
 
 
 data class RegionDto (
-    val regionId: Long,
+    val id: Long,
     val name: String,
 ) : Serializable {
     companion object {
-        fun fromResponseDtoRegion(region: Region): RegionDto {
+        fun fromRegion(region: Region): RegionDto {
             return RegionDto(
-                regionId = region.regionId,
+                id = region.regionId,
                 name = region.name
             )
         }
     }
-
-
 }

@@ -1,6 +1,8 @@
 package org.wine.productservice.wine.entity
 
 import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
 import java.time.Instant
 
 @Entity
@@ -14,14 +16,11 @@ class Region(
     @Column(name = "name", nullable = false)
     var name: String,
 
-    @Column(name = "created_at", nullable = false)
-    var createdAt: Instant,
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdAt: Instant = Instant.now(),
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = true)
     var updatedAt: Instant? = null,
-) {
-    constructor() : this(
-        name = "",
-        createdAt = Instant.now()
-    )
-}
+)
