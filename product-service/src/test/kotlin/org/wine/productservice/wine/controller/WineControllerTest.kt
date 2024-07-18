@@ -15,7 +15,7 @@ import org.wine.productservice.product.controller.WineController
 import org.wine.productservice.wine.dto.CategoryDto
 import org.wine.productservice.wine.dto.RegionDto
 import org.wine.productservice.wine.dto.WineDto
-import org.wine.productservice.wine.dto.WineRequestDto
+import org.wine.productservice.wine.dto.WineCreateRequestDto
 import org.wine.productservice.wine.service.WineService
 import java.math.BigDecimal
 
@@ -35,7 +35,7 @@ class WineControllerTest {
     @Test
     fun `addWine - Success`() {
         // Given
-        val requestDto = WineRequestDto(
+        val requestDto = WineCreateRequestDto(
             name = "Chardonnay",
             description = "A popular white wine with a wide range of flavors from apple to tropical fruits.",
             regionId = 1L,
@@ -47,7 +47,7 @@ class WineControllerTest {
             name = "Chardonnay",
             description = "A popular white wine with a wide range of flavors from apple to tropical fruits.",
             region = RegionDto(id = 1L, name = "Napa Valley"),
-            category = setOf(CategoryDto(id = 1L, name = "White")),
+            categories = setOf(CategoryDto(id = 1L, name = "White")),
             alcoholPercentage = BigDecimal("13.5"),
         )
         `when`(wineService.addWine(requestDto)).thenReturn(expectedWineDto)

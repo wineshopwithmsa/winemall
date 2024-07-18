@@ -6,7 +6,7 @@ import java.io.Serializable
 import java.math.BigDecimal
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class WineRequestDto(
+data class WineCreateRequestDto(
     @NotBlank(message ="Name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters long")
     val name: String,

@@ -12,7 +12,7 @@ data class WineDto(
     val description: String,
     val alcoholPercentage: BigDecimal,
     val region: RegionDto?,
-    val category: Set<CategoryDto>?,
+    val categories: Set<CategoryDto>?,
 ) : Serializable {
         companion object {
             fun fromWine(wine: Wine): WineDto {
@@ -22,7 +22,7 @@ data class WineDto(
                     description = wine.description,
                     alcoholPercentage = wine.alcoholPercentage,
                     region = wine.region.let { RegionDto.fromRegion(it) },
-                    category = wine.category.map { CategoryDto.fromCategory(it.category) }.toSet()
+                    categories = wine.categories.map { CategoryDto.fromCategory(it.category) }.toSet()
                 )
             }
         }
