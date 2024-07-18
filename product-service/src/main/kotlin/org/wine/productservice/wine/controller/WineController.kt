@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import jwt.JwtTokenProvider
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.wine.productservice.auth.AuthService
-import org.wine.productservice.exception.UnauthorizedException
-import org.wine.productservice.wine.dto.WineResponseDto
-import org.wine.productservice.wine.entity.UserType
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.wine.productservice.wine.dto.WineRequestDto
+import org.wine.productservice.wine.dto.WineDto
 import org.wine.productservice.wine.service.WineService
 
 
@@ -20,30 +21,23 @@ import org.wine.productservice.wine.service.WineService
 @RequestMapping("/api/wines")
 class WineController @Autowired constructor(
     private val wineService: WineService,
-    private val authService: AuthService
 ){
     @GetMapping("/health")
     fun health(): String {
         return "ok";
     }
 
+    @PostMapping("/v1")
+    fun createWine(@RequestBody requestDto: WineRequestDto): ResponseEntity<ApiResponse<Any>> {
+        val wine = wineService.addWine(requestDto)
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.Success(status = 201, message = "Created", data = mapOf("wine" to wine)))
+    }
+
     @GetMapping("/v1")
     fun getWines(@RequestHeader headers: HttpHeaders): ResponseEntity<ApiResponse<Any>> {
-        val userRole = authService.getAccountInfo()
-
-        return when (UserType.fromValue(userRole)) {
-            UserType.SELLER -> {
-                val wineResponse: List<WineResponseDto>? = wineService.getWinesForSeller()
-                ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = wineResponse))
-            }
-            // TODO: consumer
-//            "CONSUMER" -> {
-//                wineService.getWinesForConsumer()
-//                val wineResponse: List<WineResponseDto>? = wineService.getWinesForConsumer()
-//                ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = wineResponse))
-//            }
-            else -> throw UnauthorizedException("Invalid user role")
-        }
+        val wines: List<WineDto>? = wineService.getWinesForSeller()
+        return ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = mapOf("wines" to wines)))
     }
 
     @GetMapping("/test/v1")

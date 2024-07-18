@@ -10,7 +10,6 @@ spring:
     url: jdbc:postgresql://ls-0c680c2adbc7c152941c70c39a18994bd30480ef.cpd3bfmvavpa.ap-northeast-2.rds.amazonaws.com:5432/productservice
     username: dbmasteruser
     password: testwinemall
-    database-name: productservice
   jpa:
     hibernate:
       ddl-auto: update
@@ -36,3 +35,9 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+logging:
+  level:
+    root: DEBUG
+    org.springframework: DEBUG
+    org.wine: DEBUG  # 귀하의 애플리케이션 패키지
+
