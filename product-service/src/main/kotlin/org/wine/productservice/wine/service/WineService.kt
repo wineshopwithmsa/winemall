@@ -25,7 +25,13 @@ class WineService @Autowired constructor(
     private val wineCategoryRepository: WineCategoryRepository,
     private val authService: AuthService,
 ) {
-    fun getWinesForSeller(): List<WineDto> {
+    fun getWine(wineId: Long): WineDto {
+        var wine = wineRepository.findById(wineId)
+            .orElseThrow { WineNotFoundException(wineId)}
+        return wineMapper.toWineDto(wine)
+    }
+
+    fun getWines(): List<WineDto> {
         return wineRepository.findAll().map { wine -> WineDto.fromWine(wine) }
     }
 
@@ -124,5 +130,7 @@ class WineService @Autowired constructor(
             }
         }
     }
+
+
 
 }

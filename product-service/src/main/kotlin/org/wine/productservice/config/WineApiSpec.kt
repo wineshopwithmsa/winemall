@@ -35,6 +35,14 @@ open class ApiResponseBadRequest {
     val message: String = ""
 }
 
+open class ApiResponseNotFound {
+    @field:Schema(example = "400")
+    val status: Int = 0
+
+    @field:Schema(example = "Bad Request")
+    val message: String = ""
+}
+
 open class ApiResponseServerError {
     @field:Schema(example = "500")
     val status: Int = 0
@@ -48,6 +56,31 @@ class CreateWine201: ApiResponseCreated<WineResponse>()
 class UpdateWine200: ApiResponseCreated<WineResponse>()
 
 object WineApiSpec {
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Operation(
+        summary = "와인 상세 조회",
+        description = "와인 상세 정보를 조회합니다.",
+        responses = [
+            SwaggerApiResponse(
+                responseCode = "200",
+                description = "입력받은 wine id로 와인 상세 정보 조회 성공",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWines200::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "404",
+                description = "입력받은 wine id에 대한 와인을 찾을 수 없음.",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseNotFound::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "500",
+                description = "서버 에러",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseServerError::class))]
+            ),
+        ]
+    )
+    annotation class GetWine
+
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
     @Operation(

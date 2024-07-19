@@ -36,21 +36,43 @@ class WineController @Autowired constructor(
     @WineApiSpec.CreateWine
     fun createWine(@Valid @RequestBody requestDto: WineCreateRequestDto): ResponseEntity<ApiResponse<Any>> {
         val wine = wineService.addWine(requestDto)
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.Success(status = 201, message = "Created", data = WineResponse(wine)))
+        return ResponseEntity.ok(ApiResponse.Success(
+            status = 200,
+            message = "Success",
+            data = WineResponse(wine)
+        ))
     }
 
     @GetMapping("/v1")
     @WineApiSpec.GetWines
     fun getWines(@RequestHeader headers: HttpHeaders): ResponseEntity<ApiResponse<Any>> {
-        val wines: List<WineDto> = wineService.getWinesForSeller()
-        return ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = WinesResponse(wines)))
+        val wines: List<WineDto> = wineService.getWines()
+        return ResponseEntity.ok(ApiResponse.Success(
+            status = 200,
+            message = "Success",
+            data = WinesResponse(wines)
+        ))
+    }
+
+    @GetMapping("/v1/{wineId}")
+    @WineApiSpec.GetWine
+    fun getWine(@PathVariable wineId:Long): ResponseEntity<ApiResponse<Any>> {
+        var wine = wineService.getWine(wineId)
+        return ResponseEntity.ok(ApiResponse.Success(
+            status = HttpStatus.OK.value(),
+            message = "Success",
+            data = WineResponse(wine)
+        ))
     }
 
     @PatchMapping("/v1/{wineId}")
     @WineApiSpec.UpdateWine
     fun updateWine(@Valid @PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ResponseEntity<ApiResponse<Any>> {
         val wine = wineService.updateWine(wineId, requestDto)
-        return ResponseEntity.ok(ApiResponse.Success(status = 200, message = "Success", data = mapOf("wine" to wine)))
+        return ResponseEntity.ok(ApiResponse.Success(
+            status = HttpStatus.OK.value(),
+            message = "Success",
+            data = mapOf("wine" to wine)
+        ))
     }
 }
