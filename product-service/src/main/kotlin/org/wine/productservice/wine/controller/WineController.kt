@@ -2,6 +2,7 @@ package org.wine.productservice.product.controller
 
 import ApiResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Max
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.wine.productservice.config.WineApiSpec
+import org.wine.productservice.shared.validator.ValidIds
 import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.service.WineService
 
@@ -49,10 +51,28 @@ class WineController @Autowired constructor(
     @GetMapping("/v1")
     @WineApiSpec.GetWines
     fun getWines(
+        @Parameter(description = "페이지 번호", example = "1")
         @RequestParam(defaultValue = "1") @Min(1) page: Int,
+
+        @Parameter(description = "페이지 당 아이템 수", example = "3")
         @RequestParam(defaultValue = "3") @Min(1) @Max(100) perPage: Int,
-    ): ResponseEntity<ApiResponse<Any>> {
-        val wines: PaginatedWineResponseDto = wineService.getWines(page, perPage)
+
+        @Parameter(description = "지역 ID(복수 가능. 쉼표로 구분)", example = "1,2,3")
+        @ValidIds(fieldName = "regionId") @RequestParam(required = false) regionId: String?,
+
+        @Parameter(description = "카테고리 ID(복수 가능. 쉼표로 구분)", example = "1,2,3")
+        @ValidIds(fieldName = "categoryId") @RequestParam(required = false) categoryId: String?,
+        ): ResponseEntity<ApiResponse<Any>> {
+        val regionIds = regionId?.split(",")?.map { it.toLong() }
+        val categoryIds = categoryId?.split(",")?.map { it.toLong() }
+
+        val wines: PaginatedWineResponseDto = wineService.getWines(
+            page = page,
+            perPage = perPage,
+            regionIds = regionIds,
+            categoryIds = categoryIds
+        )
+
         return ResponseEntity.ok(ApiResponse.Success(
             status = 200,
             message = "Success",

@@ -3,10 +3,12 @@ package org.wine.productservice.wine.service
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import org.wine.productservice.auth.AuthService
 import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
+import org.wine.productservice.wine.entity.Wine
 import org.wine.productservice.wine.entity.WineCategory
 import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
@@ -15,6 +17,8 @@ import org.wine.productservice.wine.repository.CategoryRepository
 import org.wine.productservice.wine.repository.RegionRepository
 import org.wine.productservice.wine.repository.WineCategoryRepository
 import org.wine.productservice.wine.repository.WineRepository
+import jakarta.persistence.criteria.Predicate
+import javax.swing.plaf.synth.Region
 
 @Service
 class WineService @Autowired constructor(
@@ -32,9 +36,30 @@ class WineService @Autowired constructor(
         return wineMapper.toWineDto(wine)
     }
 
-    fun getWines(page: Int, perPage: Int): PaginatedWineResponseDto {
+    fun getWines(
+        page: Int,
+        perPage: Int,
+        regionIds: List<Long>? = null,
+        categoryIds: List<Long>? = null
+    ): PaginatedWineResponseDto {
         val pageable = PageRequest.of(page - 1, perPage)
-        val winesPage = wineRepository.findAll(pageable)
+        val specification = Specification<Wine> { root, query, criteriaBuilder ->
+            val predicates = mutableListOf<Predicate>()
+
+            regionIds?.let { ids ->
+                predicates.add(root.get<Region>("region").get<Long>("id").`in`(ids))
+            }
+
+            categoryIds?.let { ids ->
+                val joinWineCategory = root.join<Wine, WineCategory>("categories")
+                val joinCategory = joinWineCategory.join<WineCategory, Category>("category")
+                predicates.add(joinCategory.get<Long>("id").`in`(ids))
+            }
+
+            criteriaBuilder.and(*predicates.toTypedArray())
+        }
+
+        val winesPage = wineRepository.findAll(specification, pageable)
         return winePaginationMapper.toPaginatedWineResponse(winesPage, "/api/wines")
     }
 
