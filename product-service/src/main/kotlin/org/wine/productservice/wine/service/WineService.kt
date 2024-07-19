@@ -4,14 +4,12 @@ import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.exception.RegionNotFoundException
 import org.wine.productservice.wine.dto.WineCreateRequestDto
 import org.wine.productservice.wine.dto.WineDto
 import org.wine.productservice.wine.dto.WineUpdateRequestDto
 import org.wine.productservice.wine.entity.Category
 import org.wine.productservice.wine.entity.WineCategory
-import org.wine.productservice.wine.exception.CategoryNotFoundException
-import org.wine.productservice.wine.exception.WineNotFoundException
+import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.repository.CategoryRepository
 import org.wine.productservice.wine.repository.RegionRepository
@@ -36,7 +34,7 @@ class WineService @Autowired constructor(
         val userId = authService.getAccountId()
 
         val region = regionRepository.findById(wineDto.regionId).
-                    orElseThrow { RegionNotFoundException(wineDto.regionId) }
+                    orElseThrow { InvalidRegionException(wineDto.regionId) }
         val categories = getCategoriesFromIds(wineDto.categoryIds)
         val wine = wineMapper.toWine(wineDto, region)
         wine.registrantId = userId
@@ -56,7 +54,7 @@ class WineService @Autowired constructor(
         if (categories.size != categoryIds.size) {
             val foundIds = categories.map { it.categoryId }.toSet()
             val missingIds = categoryIds - foundIds
-            throw CategoryNotFoundException(missingIds)
+            throw InvalidCategoryException(missingIds)
         }
 
         return categories.toSet()
@@ -89,7 +87,7 @@ class WineService @Autowired constructor(
 
         requestDto.regionId?.let { regionId ->
             val region = regionRepository.findById(regionId)
-                .orElseThrow { RegionNotFoundException(regionId) }
+                .orElseThrow { InvalidRegionException(regionId) }
             wine.region = region
         }
 
@@ -110,19 +108,19 @@ class WineService @Autowired constructor(
     fun validateWineUpdateRequestDto(requestDto: WineUpdateRequestDto) {
         requestDto.name?.let {
             if (it.isBlank()) {
-                throw IllegalArgumentException("Name cannot be blank")
+                throw InvalidRequestException(WineValidationMessages.NAME_BLANK)
             }
             if (it.length < 2 || it.length > 100) {
-                throw IllegalArgumentException("Name must be between 2 and 100 characters long")
+                throw InvalidRequestException(WineValidationMessages.NAME_LENGTH)
             }
         }
 
         requestDto.description?.let {
             if (it.isBlank()) {
-                throw IllegalArgumentException("Description cannot be blank")
+                throw InvalidRequestException(WineValidationMessages.DESCRIPTION_BLANK)
             }
             if (it.length > 5000) {
-                throw IllegalArgumentException("Description must be at most 5000 characters long")
+                throw InvalidRequestException(WineValidationMessages.DESCRIPTION_LENGTH)
             }
         }
     }

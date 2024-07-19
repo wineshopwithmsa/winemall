@@ -17,3 +17,10 @@ logging:
     org.springframework: DEBUG
     org.wine: DEBUG
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  override-with-generic-response: false
