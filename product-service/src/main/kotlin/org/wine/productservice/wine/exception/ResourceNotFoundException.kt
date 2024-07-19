@@ -1,6 +1,6 @@
 package org.wine.productservice.wine.exception
 
-import org.wine.productservice.exception.NotFoundException
+import org.wine.productservice.config.NotFoundException
 
 class CategoryNotFoundException private constructor(message: String) : NotFoundException(message) {
     constructor(categoryIds: Set<Long>) : this("Categories not found with ids: $categoryIds")

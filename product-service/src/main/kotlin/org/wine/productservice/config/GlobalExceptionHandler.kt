@@ -1,4 +1,4 @@
-package org.wine.productservice.exception
+package org.wine.productservice.config
 
 import com.sun.jdi.request.InvalidRequestStateException
 import io.github.oshai.kotlinlogging.KotlinLogging

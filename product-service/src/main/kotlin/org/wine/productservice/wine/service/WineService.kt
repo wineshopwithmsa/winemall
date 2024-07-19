@@ -2,15 +2,15 @@ package org.wine.productservice.wine.service
 
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.dto.WineCreateRequestDto
-import org.wine.productservice.wine.dto.WineDto
-import org.wine.productservice.wine.dto.WineUpdateRequestDto
+import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
 import org.wine.productservice.wine.entity.WineCategory
 import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
+import org.wine.productservice.wine.mapper.WinePaginationMapper
 import org.wine.productservice.wine.repository.CategoryRepository
 import org.wine.productservice.wine.repository.RegionRepository
 import org.wine.productservice.wine.repository.WineCategoryRepository
@@ -20,6 +20,7 @@ import org.wine.productservice.wine.repository.WineRepository
 class WineService @Autowired constructor(
     private val wineRepository: WineRepository,
     private val wineMapper: WineMapper,
+    private val winePaginationMapper: WinePaginationMapper,
     private val regionRepository: RegionRepository,
     private val categoryRepository: CategoryRepository,
     private val wineCategoryRepository: WineCategoryRepository,
@@ -31,8 +32,10 @@ class WineService @Autowired constructor(
         return wineMapper.toWineDto(wine)
     }
 
-    fun getWines(): List<WineDto> {
-        return wineRepository.findAll().map { wine -> WineDto.fromWine(wine) }
+    fun getWines(page: Int, perPage: Int): PaginatedWineResponseDto {
+        val pageable = PageRequest.of(page - 1, perPage)
+        val winesPage = wineRepository.findAll(pageable)
+        return winePaginationMapper.toPaginatedWineResponse(winesPage, "/api/wines")
     }
 
     @Transactional

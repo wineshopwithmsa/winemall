@@ -1,6 +1,6 @@
 package org.wine.productservice.wine.exception
 
-import org.wine.productservice.exception.BadRequestException
+import org.wine.productservice.config.BadRequestException
 
 class InvalidCategoryException private constructor(message: String) : BadRequestException(message) {
     constructor(categoryIds: Set<Long>) : this("Invalid category ids: $categoryIds")
