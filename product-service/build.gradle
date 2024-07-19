@@ -32,15 +32,16 @@ repositories {
 }
 
 dependencies {
+    // springboot web initial setting
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation name: 'commonlib', version: '0.7', ext: 'jar'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // eureka
 // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '4.1.3'
 
@@ -49,10 +50,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // mapstruct
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     kapt 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // library
+    implementation name: 'commonlib', version: '0.7', ext: 'jar'
+
+    // openapi
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+    implementation 'org.springdoc:springdoc-openapi-kotlin:1.7.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-common:2.2.0'
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // logging
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.9")
 }
 
 kotlin {
