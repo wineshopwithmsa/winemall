@@ -1,3 +1,6 @@
+server:
+  port: 9093
+
 spring:
   jpa:
     hibernate:
