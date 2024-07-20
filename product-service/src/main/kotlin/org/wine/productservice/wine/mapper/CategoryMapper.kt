@@ -8,14 +8,15 @@ import org.wine.productservice.wine.entity.WineCategory
 
 @Mapper(componentModel = "spring")
 interface CategoryMapper {
+    @Mapping(source = "categoryId", target = "id")
     fun toCategoryDto(category: Category): CategoryDto
 
     @Mapping(source = "category", target = ".")
     @Mapping(source = "category.categoryId", target = "id")
-    fun fromWineCategory(wineCategory: WineCategory): CategoryDto
+    fun fromWineCategoryToCategoryDto(wineCategory: WineCategory): CategoryDto
 
     fun toCategoryDtoSet(wineCategories: Set<WineCategory>): Set<CategoryDto> {
-        return wineCategories.map { fromWineCategory(it) }.toSet()
+        return wineCategories.map { fromWineCategoryToCategoryDto(it) }.toSet()
     }
 }
 
