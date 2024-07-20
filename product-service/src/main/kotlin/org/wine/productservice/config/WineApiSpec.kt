@@ -2,6 +2,7 @@ package org.wine.productservice.config
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
@@ -52,6 +53,7 @@ open class ApiResponseServerError {
 }
 
 class GetWines200: ApiResponseSuccess<WinesResponse>()
+class GetWine200: ApiResponseSuccess<WineResponse>()
 class CreateWine201: ApiResponseCreated<WineResponse>()
 class UpdateWine200: ApiResponseCreated<WineResponse>()
 
@@ -65,7 +67,7 @@ object WineApiSpec {
             SwaggerApiResponse(
                 responseCode = "200",
                 description = "입력받은 wine id로 와인 상세 정보 조회 성공",
-                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWines200::class))]
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWine200::class))]
             ),
             SwaggerApiResponse(
                 responseCode = "404",
@@ -118,8 +120,9 @@ object WineApiSpec {
         ),
         responses = [
             SwaggerApiResponse(
-                responseCode = "200",
+                responseCode = "201",
                 description = "와인 생성 성공 후 생성된 와인 정보 반환",
+                headers = [Header(name = "Location", description = "URL of the newly created wine resource", schema = Schema(type = "string"))],
                 content = [Content(mediaType = "application/json", schema = Schema(implementation = CreateWine201::class))]
             ),
             SwaggerApiResponse(
