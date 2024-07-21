@@ -2,6 +2,7 @@ package org.wine.orderorchestrator.orderorchestrator.kafka.listener.order
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.listener.AcknowledgingMessageListener
@@ -19,16 +20,15 @@ class OrderCreationEventListener(
     private val objectMapper: ObjectMapper
 ): AcknowledgingMessageListener<String, String> {
 
-    @KafkaListener(topics = [OrderTopic.ORDER_CREATED])
+    private val logger = LoggerFactory.getLogger(javaClass)
+    @KafkaListener(topics = [OrderTopic.ORDER_CREATED], groupId = "order-orchestrator")
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
-        println(data.value())
-        /*
         val (key, event) = data.key() to objectMapper.readValue(data.value(), OrderCreateEvent::class.java)
-        println("Topic: $OrderTopic.ORDER_CREATED, key = $key, event: $event")
+        logger.info("Topic: $OrderTopic.ORDER_CREATED, key = $key, event: $event")
 
         val orderSaga = OrderSaga.init(eventPublisher, key, event)
+        orderSaga.operate()
         acknowledgment?.acknowledge()
 
-         */
     }
 }

@@ -5,6 +5,5 @@ data class OrderCreateEvent(
     val customerId : Long,
     val winSaleId : Long,
     val couponId : Long,
-    val quantity : Int,
-    val key : String
+    val quantity : Int
 )

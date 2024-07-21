@@ -35,6 +35,9 @@ class OrderSaga private constructor(
             key = key
         )
     }
+    fun operate() {
+        orderState.operate(this)
+    }
 
     fun publishEvent(topic: String, key: String, event: Any): Mono<SenderResult<Void>> {
         return eventPublisher.publishEvent(topic, key, event)
