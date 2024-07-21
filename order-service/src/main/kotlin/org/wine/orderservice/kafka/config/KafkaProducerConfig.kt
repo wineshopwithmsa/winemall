@@ -1,4 +1,4 @@
-package org.wine.orderservice.order.kafka.config
+package org.wine.orderservice.kafka.config
 
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer

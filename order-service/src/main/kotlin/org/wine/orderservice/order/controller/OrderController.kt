@@ -30,6 +30,15 @@ class OrderController @Autowired constructor(
         return ApiResponse.Success(data = "test data")
     }
 
+    @PostMapping("/order")
+    @ResponseBody
+    fun orderWine(@RequestBody orderRequestDto: OrderRequestDto):ApiResponse<Any>{
+        orderService.createOrder(orderRequestDto)
+
+        return ApiResponse.Success(HttpStatus.OK.value())
+    }
+
+    /*
     @GetMapping("/price")
     @ApiOperation(value = "주문총금액, 쿠폰 적용가 조회")
     @ApiImplicitParams(value = [
@@ -46,13 +55,7 @@ class OrderController @Autowired constructor(
                 status = HttpStatus.OK.value(), message = "Success", data = orderPrice)
 
     }
+*/
 
 
-    @PostMapping("/order")
-    @ResponseBody
-     fun orderWine(@RequestBody orderRequestDto: OrderRequestDto):ApiResponse<Any>{
-
-        orderService.createOrder(orderRequestDto)
-        return ApiResponse.Success(data = "test data")
-    }
 }

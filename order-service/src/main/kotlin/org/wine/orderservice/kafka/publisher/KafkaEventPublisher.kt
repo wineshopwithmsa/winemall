@@ -1,9 +1,8 @@
-package org.wine.orderservice.order.kafka.publisher
+package org.wine.orderservice.kafka.publisher
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Component
-import org.wine.orderservice.order.transaction.TransactionEventPublisher
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.SenderResult
 
