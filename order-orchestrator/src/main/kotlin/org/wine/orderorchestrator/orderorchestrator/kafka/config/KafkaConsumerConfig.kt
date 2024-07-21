@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.listener.AcknowledgingMessageListener
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.UUID
@@ -19,9 +20,10 @@ class KafkaConsumerConfig(
 
     @Primary
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun kafkaListenerContainerFactory(listener: AcknowledgingMessageListener<String, String>): ConcurrentKafkaListenerContainerFactory<String, String> {
         val containerFactory = ConcurrentKafkaListenerContainerFactory<String, String>()
         containerFactory.consumerFactory = consumerFactory()
+        containerFactory.containerProperties.ackMode = kafkaProperties.listener.ackMode
 
         return containerFactory
     }
@@ -39,7 +41,7 @@ class KafkaConsumerConfig(
         return hashMapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ConsumerConfig.GROUP_ID_CONFIG to hostName,
-            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "true",
+            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,

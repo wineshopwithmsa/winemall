@@ -1,12 +1,9 @@
 package org.wine.orderservice.order.dto.request
 
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotEmpty
-import jakarta.validation.constraints.NotNull
+
+import org.wine.orderservice.order.dto.OrderDto
 
 data class OrderPriceRequestDto(
-    @get:NotEmpty
-    val productIdList: List<@NotNull Long>,
-
-    val couponIdList : List<@NotNull Long>
+    val productList: List<OrderDto>,
+    val couponIdList : List<Long>
 )

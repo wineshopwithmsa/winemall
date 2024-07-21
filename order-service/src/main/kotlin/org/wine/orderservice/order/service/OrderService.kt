@@ -3,25 +3,28 @@ package org.wine.orderservice.order.service
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
+import org.wine.orderservice.order.dto.request.OrderRequestDto
 import org.wine.orderservice.order.dto.response.OrderPriceResponseDto
-import org.wine.orderservice.order.entity.Coupon
-import org.wine.orderservice.order.entity.WineSale
-import org.wine.orderservice.order.repository.CouponRepository
 import org.wine.orderservice.order.repository.OrderRepository
-import org.wine.orderservice.order.repository.WineRepository
+import org.wine.orderservice.order.transaction.TransactionEventPublisher
+import org.wine.orderservice.order.transaction.event.OrderCreateEvent
+import reactor.core.publisher.Mono
+import java.util.*
 
 @Service
 class OrderService  @Autowired constructor(
     private val orderRepository: OrderRepository,
-    private val wineRepository: WineRepository,
-    private val couponRepository: CouponRepository){
+    private val transactionEventPublisher: TransactionEventPublisher){
 
     fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto) : OrderPriceResponseDto{
+        /*
         //와인 가격 총합 금액
-        val wines : List<WineSale> = wineRepository.findAllById(orderPriceRequestDto.productIdList)
-        val sumPrice = wines.stream()
-            .mapToInt(WineSale::price)
-            .sum()
+        var sumPrice : Int = 0;
+        orderPriceRequestDto.productList
+            .forEach { orderDto ->
+                sumPrice += wineRepository.findById(orderDto.productId)
+                    .get().price * orderDto.quantity }
+
 
         //쿠폰 적용가
         var finalPrice : Int = sumPrice;
@@ -34,10 +37,27 @@ class OrderService  @Autowired constructor(
 
             finalPrice = sumPrice * sumPrice
         }
-
+    */
         return OrderPriceResponseDto(
-            sumPrice = sumPrice,
-            finalPrice = finalPrice
+            sumPrice = 1,
+            finalPrice = 1
         )
+    }
+
+
+    fun createOrder(orderRequestDto: OrderRequestDto){
+         transactionEventPublisher.publishEvent(
+            topic = "ORDER-CREATED",
+            key = UUID.randomUUID().toString().replace("-", ""),
+            event = OrderCreateEvent(
+                orderId = orderRequestDto.orderId,
+                winSaleId = orderRequestDto.wineSaleId,
+                couponId = orderRequestDto.couponId,
+                quantity = orderRequestDto.quantity,
+                customerId = orderRequestDto.memberId
+            )
+        ).then(Mono.just(Unit))
+            .also{println("트랜잭션 요청")}
+            .subscribe()
     }
 }
