@@ -1,3 +1,5 @@
+server:
+  port: 6010
 spring:
   application:
     name: order-service
@@ -22,8 +24,7 @@ spring:
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: true        # 쿼리 로그 출력
 
-server:
-  port: 6010
+
   kafka:
     bootstrap-servers: 127.0.0.1:9092
     producer:
@@ -33,9 +34,9 @@ server:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    listener:
-      ack-mode: manual
-      poll-timeout: 5000
+      enable-auto-commit: false
+      group-id: order-orchestrator
+      auto-offset-reset: latest
 
 
 eureka:
