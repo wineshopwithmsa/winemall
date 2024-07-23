@@ -29,36 +29,41 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-    implementation "org.springframework.boot:spring-boot-starter-webflux"
-    implementation 'org.jetbrains.kotlin:kotlin-reflect'
-    implementation name: 'commonlib', version: '0.2', ext: 'jar'
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '4.1.3'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
-    //implementation group: 'jakarta.persistence', name: 'jakarta.persistence-api', version: '3.2.0'
-    implementation 'io.springfox:springfox-boot-starter:3.0.0'
-    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.3'
-    compileOnly 'org.projectlombok:lombok'
 
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //db
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //kotlin
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation "io.projectreactor.kotlin:reactor-kotlin-extensions"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    //msa
+    implementation name: 'commonlib', version: '0.2', ext: 'jar'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '4.1.3'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.3'
+
+    //swagger
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
 
     // Kafka
     implementation "org.springframework.kafka:spring-kafka"
     implementation "io.projectreactor.kafka:reactor-kafka"
 
     // coroutine
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.3.9"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.3.9"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-reactor"
 
     //local test
     runtimeOnly 'com.h2database:h2'
