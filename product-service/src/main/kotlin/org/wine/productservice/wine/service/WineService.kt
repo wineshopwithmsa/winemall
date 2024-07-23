@@ -13,27 +13,38 @@ import org.wine.productservice.wine.entity.WineCategory
 import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.mapper.WinePaginationMapper
-import org.wine.productservice.wine.repository.CategoryRepository
-import org.wine.productservice.wine.repository.RegionRepository
-import org.wine.productservice.wine.repository.WineCategoryRepository
-import org.wine.productservice.wine.repository.WineRepository
 import jakarta.persistence.criteria.Predicate
+import org.wine.productservice.wine.mapper.WineSaleMapper
+import org.wine.productservice.wine.repository.*
+import java.util.stream.Collectors
 import javax.swing.plaf.synth.Region
 
 @Service
 class WineService @Autowired constructor(
-    private val wineRepository: WineRepository,
+    private val authService: AuthService,
+
     private val wineMapper: WineMapper,
+    private val wineSaleMapper: WineSaleMapper,
     private val winePaginationMapper: WinePaginationMapper,
+
+    private val wineRepository: WineRepository,
     private val regionRepository: RegionRepository,
     private val categoryRepository: CategoryRepository,
     private val wineCategoryRepository: WineCategoryRepository,
-    private val authService: AuthService,
+    private val wineSaleRepository: WineSaleRepository
 ) {
     fun getWine(wineId: Long): WineDto {
         var wine = wineRepository.findById(wineId)
             .orElseThrow { WineNotFoundException(wineId)}
         return wineMapper.toWineDto(wine)
+    }
+
+    fun getWineSaleInfo(wineIdList: List<WinePriceRequestDto>): List<WineSaleDto> {
+        var wines = wineSaleRepository.findAllByWineSaleIdIn(wineIdList.map{it.wineSaleId})
+
+        return wines.stream()
+            .map{wineSaleMapper.toWineSaleDto(it)}
+            .collect(Collectors.toList())
     }
 
     fun getWines(

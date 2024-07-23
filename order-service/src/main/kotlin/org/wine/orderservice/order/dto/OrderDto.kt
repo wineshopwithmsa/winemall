@@ -1,6 +1,6 @@
 package org.wine.orderservice.order.dto
 
 data class OrderDto (
-    val productId : Long,
+    val wineSaleId : Long,
     val quantity : Int
 )
