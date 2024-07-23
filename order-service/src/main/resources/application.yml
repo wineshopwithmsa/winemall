@@ -1,9 +1,9 @@
 server:
-  port: 6010
+  port: 6011
 spring:
   application:
     name: order-service
-  # H2 Setting Info (H2 Console에 접속하기 위한 설정정보 입력)
+    ###test database로 나중에 삭제
   h2:
     console:
       enabled: true  # H2 Console을 사용할지 여부 (H2 Console은 H2 Database를 UI로 제공해주는 기능)
@@ -23,7 +23,6 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: true        # 쿼리 로그 출력
-
 
   kafka:
     bootstrap-servers: 127.0.0.1:9092
@@ -47,3 +46,10 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
+feign:
+    coupon-service-feign:
+      url: 127.0.0.1:6010
+    product-service-feign:
+      url : 127.0.0.1:6012
