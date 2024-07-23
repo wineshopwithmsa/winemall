@@ -1,8 +1,42 @@
+server:
+  port: 6011
 spring:
   application:
     name: order-service
-server:
-  port: 0
+    ###test database로 나중에 삭제
+  h2:
+    console:
+      enabled: true  # H2 Console을 사용할지 여부 (H2 Console은 H2 Database를 UI로 제공해주는 기능)
+      path: /h2-console  # H2 Console의 Path
+  # Database Setting Info (Database를 H2로 사용하기 위해 H2연결 정보 입력)
+  datasource:
+    driver-class-name: org.h2.Driver  # Database를 H2로 사용하겠다.
+    url:  jdbc:h2:~/wine  # H2 접속 정보
+    username: sa  # H2 접속 시 입력할 username 정보 (원하는 것으로 입력)
+    password:  # H2 접속 시 입력할 password 정보 (원하는 것으로 입력)
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update       # DB 초기화 전략 (none, create, create-drop, update, validate)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true      # 쿼리 로그 포맷 (정렬)
+        show_sql: true        # 쿼리 로그 출력
+
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    producer:
+      retries: 1
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+      group-id: order-orchestrator
+      auto-offset-reset: latest
+
 
 eureka:
   client:
@@ -12,3 +46,10 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+
+feign:
+    coupon-service-feign:
+      url: 127.0.0.1:6010
+    product-service-feign:
+      url : 127.0.0.1:6012

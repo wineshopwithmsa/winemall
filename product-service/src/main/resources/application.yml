@@ -1,6 +1,6 @@
 
 server:
-  port: 0
+  port: 6012
 
 spring:
   application:

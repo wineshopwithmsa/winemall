@@ -10,6 +10,9 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+      group-id: order-orchestrator
+      auto-offset-reset: latest
     listener:
       ack-mode: manual
       poll-timeout: 5000
