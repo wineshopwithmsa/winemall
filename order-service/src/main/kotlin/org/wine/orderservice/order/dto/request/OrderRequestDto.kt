@@ -16,14 +16,12 @@ data class OrderRequestDto(
     val receiverAddrDetail : String,
     val totalPrice : Int,
     val finalPrice : Int,
-    val rsrvDate : String,
-
     //EXTRA
     val wineList : List<OrderDto>,
     val couponId : Long,
     val memberId : Long
 ){
-    fun toEntity() : Order {
+    fun toEntity(rsrvDate : String) : Order {
         return Order(
             receiverPhoneNumber = receiverPhoneNumber,
             receiverName = receiverName,

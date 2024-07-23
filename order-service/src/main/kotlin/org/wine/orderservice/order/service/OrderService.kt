@@ -2,9 +2,11 @@ package org.wine.orderservice.order.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
 import org.wine.orderservice.order.repository.OrderRepository
@@ -91,8 +93,9 @@ class OrderService  @Autowired constructor(
     }
 
 
-    fun createOrder(orderRequestDto: OrderRequestDto){
-        var order : Order = orderRequestDto.toEntity()
+    @Transactional
+    suspend fun createOrder(orderRequestDto: OrderRequestDto, rsrvDate : String){
+        var order : Order = orderRequestDto.toEntity(rsrvDate)
 
         orderRepository.save(
             order
@@ -107,8 +110,8 @@ class OrderService  @Autowired constructor(
                         memberId = orderRequestDto.memberId
                     )
                 ).then(Mono.just(Unit))
-                    .also{logger.info("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
-                    .subscribe()
+                    .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
             }
+            .awaitSingle()
     }
 }
