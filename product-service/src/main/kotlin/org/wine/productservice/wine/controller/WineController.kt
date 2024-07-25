@@ -77,7 +77,7 @@ class WineController @Autowired constructor(
 
         @Parameter(description = "카테고리 ID(복수 가능. 쉼표로 구분)", example = "1,2,3")
         @ValidIds(fieldName = "categoryId") @RequestParam(required = false) categoryId: String?,
-        ): ResponseEntity<ApiResponse<Any>> {
+        ): ApiResponse<Any> {
         val regionIds = regionId?.split(",")?.map { it.toLong() }
         val categoryIds = categoryId?.split(",")?.map { it.toLong() }
 
@@ -88,32 +88,32 @@ class WineController @Autowired constructor(
             categoryIds = categoryIds
         )
 
-        return ResponseEntity.ok(ApiResponse.Success(
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = WinesResponse(wines)
-        ))
+        )
     }
 
     @GetMapping("/v1/{wineId}")
     @WineApiSpec.GetWine
-    fun getWine(@PathVariable wineId:Long): ResponseEntity<ApiResponse<Any>> {
+    fun getWine(@PathVariable wineId:Long): ApiResponse<Any> {
         var wine = wineService.getWine(wineId)
-        return ResponseEntity.ok(ApiResponse.Success(
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = WineResponse(wine)
-        ))
+        )
     }
 
     @PatchMapping("/v1/{wineId}")
     @WineApiSpec.UpdateWine
-    fun updateWine(@Valid @PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ResponseEntity<ApiResponse<Any>> {
+    fun updateWine(@Valid @PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ApiResponse<Any> {
         val wine = wineService.updateWine(wineId, requestDto)
-        return ResponseEntity.ok(ApiResponse.Success(
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = mapOf("wine" to wine)
-        ))
+        )
     }
 }

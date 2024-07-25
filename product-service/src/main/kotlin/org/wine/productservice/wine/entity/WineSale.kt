@@ -6,15 +6,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 
 @Entity
-@Table(name = "WINE_SALE")
+@Table(name = "wine_sale")
 @Getter
 @EntityListeners(AuditingEntityListener::class)
 class WineSale (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "WINE_SALE_ID", nullable = false)
+    @Column(name = "wine_sale_id", nullable = false)
     val wineSaleId: Long = 0L,
 
-    @Column(name = "PRICE", nullable = false)
+    @Column(name = "price", nullable = false)
     var price: Int
 )
