@@ -5,5 +5,5 @@ import org.wine.orderservice.order.dto.OrderDto
 
 data class OrderPriceRequestDto(
     val productList: List<OrderDto>,
-    val couponID : Long
+    val couponId : Long
 )

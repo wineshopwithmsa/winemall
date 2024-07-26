@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponses
-import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -67,7 +66,7 @@ class OrderController @Autowired constructor(
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-    fun getPrice(@RequestBody orderPriceDto: OrderPriceRequestDto): ApiResponse<Any> {
+    suspend fun getPrice(@RequestBody orderPriceDto: OrderPriceRequestDto): ApiResponse<Any> {
         val orderPrice : OrderPriceResponseDto = orderService.getOrderPrice(orderPriceDto)
 
         return ApiResponse.Success(
