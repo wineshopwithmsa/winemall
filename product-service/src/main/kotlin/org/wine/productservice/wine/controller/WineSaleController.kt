@@ -16,7 +16,7 @@ class WineSaleController @Autowired constructor(
     private val wineSaleService: WineSaleService,
 ){
     @GetMapping("/v1")
-    @WineApiSpec.GetWineSaleInfo
+    @WineApiSpec.GetWineSales
     fun getWineSales(@ModelAttribute requestDto: WineSalesRequestDto): ApiResponse<Any> {
         var wines = wineSaleService.getWineSales(requestDto)
 

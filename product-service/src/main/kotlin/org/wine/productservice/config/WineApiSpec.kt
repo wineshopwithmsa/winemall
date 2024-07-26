@@ -57,6 +57,8 @@ class GetWine200: ApiResponseSuccess<WineResponse>()
 class CreateWine201: ApiResponseCreated<WineResponse>()
 class UpdateWine200: ApiResponseCreated<WineResponse>()
 
+class GetWineSales200: ApiResponseSuccess<WineSalesResponse>()
+
 object WineApiSpec {
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
@@ -196,4 +198,24 @@ object WineApiSpec {
         ]
     )
     annotation class UpdateWine
+
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Operation(
+        summary = "와인 판매 목록 조회",
+        description = "와인 판매 목록을 조회합니다.",
+        responses = [
+            SwaggerApiResponse(
+                responseCode = "200",
+                description = "와인 판매 목록 조회 성공",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWineSales200::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "500",
+                description = "서버 에러",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseServerError::class))]
+            ),
+        ]
+    )
+    annotation class GetWineSales
 }
