@@ -40,7 +40,7 @@ class MemberService @Autowired constructor(
         return MemberResponseDto.fromResponseDtoUser(savedUser)
     }
 
-    suspend fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+    fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
         val authentication = authenticateUser(authRequestDTO.email, authRequestDTO.password)
         return if (authentication.isAuthenticated) {
             val member = memberRepository.findByEmail(authRequestDTO.email)

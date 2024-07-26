@@ -1,10 +1,9 @@
-package org.wine.userservice.usercoupon.entity
+package org.wine.userservice.membercoupon.entity
 
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
-import lombok.Getter
-import lombok.NoArgsConstructor
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.wine.userservice.membercoupon.dto.request.MemberCouponRequestDto
+import org.wine.userservice.user.entity.Member
 import java.time.LocalDateTime
 
 @Entity
@@ -28,12 +27,31 @@ class MemberCoupon (
     @Column(name = "expire_time", nullable = false)
     var expireTime: LocalDateTime,
 
+    @Column(name = "used_time", nullable = false)
+    var usedTime: LocalDateTime = LocalDateTime.parse("9999-12-31T00:00:00"),
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    var member: Member
+
 ){
     constructor() : this(
         memberCouponId = 0L,
         couponId = 0L, // 기본값 설정
         isUsed = false, // 기본값 설정
         issuedTime = LocalDateTime.now(),
-        expireTime = LocalDateTime.now()
+        expireTime = LocalDateTime.now(),
+        usedTime = LocalDateTime.parse("9999-12-31T00:00:00"),
+        member = Member()
     )
+    constructor(dto: MemberCouponRequestDto, member: Member) : this(
+        memberCouponId = 0L,
+        couponId = dto.couponId,
+        isUsed = dto.isUsed,
+        issuedTime = dto.issuedTime,
+        expireTime = dto.expireTime,
+        usedTime = LocalDateTime.parse("9999-12-31T00:00:00"),
+        member = member
+    )
+
 }
