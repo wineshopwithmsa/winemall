@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -136,5 +137,17 @@ class OrderService  @Autowired constructor(
                     .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
             }
             .awaitSingle()
+    }
+
+    @Transactional
+    fun approveOrder(id: Long) {
+        orderRepository.findByIdOrNull(id)
+            ?.approve()
+    }
+
+    @Transactional
+    fun cancelOrder(id: Long) {
+        orderRepository.findByIdOrNull(id)
+            ?.cancel()
     }
 }
