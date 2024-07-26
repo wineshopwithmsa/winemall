@@ -1,12 +1,22 @@
 package org.wine.orderservice.order.service
 
+import ApiResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.reactive.function.BodyInserter
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBodyOrNull
+import org.springframework.web.util.UriComponentsBuilder
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
 import org.wine.orderservice.order.repository.OrderRepository
@@ -16,10 +26,9 @@ import org.wine.orderservice.order.WineSaleDto
 import org.wine.orderservice.order.dto.CouponDto
 import org.wine.orderservice.order.dto.DiscountType
 import org.wine.orderservice.order.dto.OrderDto
+import org.wine.orderservice.order.dto.Response
 import org.wine.orderservice.order.dto.response.OrderPriceResponseDto
 import org.wine.orderservice.order.entity.Order
-import org.wine.orderservice.order.feign.CouponServiceFeign
-import org.wine.orderservice.order.feign.ProductServiceFeign
 import reactor.core.publisher.Mono
 import java.util.*
 
@@ -27,21 +36,30 @@ import java.util.*
 class OrderService  @Autowired constructor(
     private val orderRepository: OrderRepository,
     private val transactionEventPublisher: TransactionEventPublisher,
-    private val productServiceFeign: ProductServiceFeign,
-    private val couponServiceFeign: CouponServiceFeign
+    private val webClient: WebClient
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Value("\${uri.product-service}")
+    lateinit var productService: String
+
+    @Value("\${uri.coupon-service}")
+    lateinit var couponService: String
+
 
     //와인 가격 총합 금액
-    fun calculatePrice(orderPriceRequestDto: OrderPriceRequestDto): Int{
-        val wines : List<WineSaleDto> = jacksonObjectMapper()
-            .readValue<List<WineSaleDto>>(productServiceFeign
-                .getWineSale(orderPriceRequestDto.productList)
-                .response.toString())
+    suspend fun calculatePrice(orderPriceRequestDto: OrderPriceRequestDto): Int{
+        val wineSaleWebClientResponse = webClient.post()
+            .uri(productService + "/api/wines/v1/sale")
+           .contentType(MediaType.APPLICATION_JSON)
+           .body(BodyInserters.fromValue(orderPriceRequestDto.productList))
+            .retrieve()
+            .awaitBodyOrNull<Response<List<WineSaleDto>>>() ?: throw Exception("Received null response")
 
 
+        val wines : List<WineSaleDto> = wineSaleWebClientResponse.data
         var sumPrice : Int = 0
+
         orderPriceRequestDto
             .productList
             .forEach{
@@ -62,26 +80,32 @@ class OrderService  @Autowired constructor(
 
 
     //쿠폰 적용가
-    fun applyCoupon(originPrice : Int, couponId : Long): Int{
+    suspend fun applyCoupon(originPrice : Int, couponId : Long): Int{
 
-        var finalPrice : Int = 0
+        var finalPrice : Int = originPrice
 
-        val coupon : CouponDto = jacksonObjectMapper()
-            .readValue<CouponDto>(couponServiceFeign
-                .getCouponInfo(couponId.toString())
-                .response.toString())
+        val couponWebClientResponse = webClient.get()
+            .uri(couponService + "/api/coupon/v1/"+couponId)
+            .retrieve()
+            .awaitBodyOrNull<Response<CouponDto>>() ?: throw Exception("Received null response")
 
-        if(coupon.discountType == DiscountType.AMOUNT){
-            finalPrice = originPrice - coupon.discountValue.toInt()
+
+        if(couponWebClientResponse.status == HttpStatus.OK.value()){ //쿠폰이 존재하면 쿠폰 적용가 계산
+            val coupon : CouponDto = couponWebClientResponse.data
+
+            if(coupon.discountType == DiscountType.AMOUNT){
+                finalPrice = originPrice - coupon.discountValue.toInt()
+            }
+            else{
+                finalPrice = originPrice * (100 - coupon.discountValue.toInt()) / 100
+            }
         }
-        else{
-            finalPrice = originPrice * (100 - coupon.discountValue.toInt()) / 100
-        }
+
 
         return finalPrice
     }
 
-    fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto): OrderPriceResponseDto{
+    suspend fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto): OrderPriceResponseDto{
 
         val sumPrice = calculatePrice(orderPriceRequestDto)
         val finalPrice = applyCoupon(sumPrice, orderPriceRequestDto.couponID)

@@ -48,8 +48,6 @@ eureka:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
 
 
-feign:
-    coupon-service-feign:
-      url: 127.0.0.1:6010
-    product-service-feign:
-      url : 127.0.0.1:6012
+uri:
+    coupon-service: http://127.0.0.1:6010
+    product-service:  http://127.0.0.1:6012
