@@ -37,9 +37,8 @@ class WineController @Autowired constructor(
         return "ok";
     }
 
-    @GetMapping("/v1/sale")
-    @WineApiSpec.GetWine
-    fun getWineSaleInfo(@RequestParam windIdList: List<WinePriceRequestDto>): ApiResponse<Any> {
+    @PostMapping("/v1/sale")
+    fun getWineSaleInfo(@RequestBody windIdList: List<WinePriceRequestDto>): ApiResponse<Any> {
         var wines = wineService.getWineSaleInfo(windIdList)
 
         return ApiResponse.Success(

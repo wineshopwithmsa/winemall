@@ -40,11 +40,11 @@ class WineService @Autowired constructor(
     }
 
     fun getWineSaleInfo(wineIdList: List<WinePriceRequestDto>): List<WineSaleDto> {
-        var wines = wineSaleRepository.findAllByWineSaleIdIn(wineIdList.map{it.wineSaleId})
+        var wines = mutableListOf<WineSaleDto>()
+        wines.addFirst(WineSaleDto(1, 5000))
+        wines.addFirst(WineSaleDto(2, 6000))
 
-        return wines.stream()
-            .map{wineSaleMapper.toWineSaleDto(it)}
-            .collect(Collectors.toList())
+        return wines
     }
 
     fun getWines(

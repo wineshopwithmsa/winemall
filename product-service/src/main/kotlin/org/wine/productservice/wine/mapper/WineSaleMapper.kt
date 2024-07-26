@@ -7,6 +7,6 @@ import org.wine.productservice.wine.entity.WineSale
 
 @Mapper(componentModel = "spring")
 interface WineSaleMapper {
-    @Mapping(source = "wineId", target = "id")
+    @Mapping(source = "wineSaleId", target = "wineSaleId")
     fun toWineSaleDto(wineSale: WineSale): WineSaleDto
 }
