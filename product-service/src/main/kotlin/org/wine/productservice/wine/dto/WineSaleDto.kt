@@ -1,6 +1,5 @@
 package org.wine.productservice.wine.dto
 
-import org.wine.productservice.wine.entity.Wine
 import org.wine.productservice.wine.entity.WineSale
 import java.io.Serializable
 
