@@ -1,8 +1,10 @@
 package org.wine.productservice.wine.service
 
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.wine.productservice.auth.AuthService
+import org.wine.productservice.wine.dto.WineSaleCreateRequestDto
 import org.wine.productservice.wine.dto.WineSaleDto
 import org.wine.productservice.wine.dto.WineSalesRequestDto
 import org.wine.productservice.wine.mapper.WineSaleMapper
@@ -17,12 +19,23 @@ class WineSaleService @Autowired constructor(
     private val wineSaleRepository: WineSaleRepository,
 ){
     fun getWineSales(requestDto: WineSalesRequestDto): List<WineSaleDto> {
-        var wines = requestDto.ids?.takeIf { it.isNotEmpty() }?.let {
+        val wineSales = requestDto.ids?.takeIf { it.isNotEmpty() }?.let {
             wineSaleRepository.findAllByWineSaleIdIn(it)
         } ?: wineSaleRepository.findAll()
 
-        return wines.stream()
-            .map{wineSaleMapper.toWineSaleDto(it)}
+        return wineSales.stream()
+            .map { wineSaleMapper.toWineSaleDto(it) }
             .collect(Collectors.toList())
+    }
+    @Transactional
+    fun addWineSale(requestDto: WineSaleCreateRequestDto): WineSaleDto {
+        val userId = authService.getAccountId()
+        val wineSale = wineSaleMapper.toWineSale(requestDto)
+
+        wineSale.sellerId = userId
+
+        val savedWineSale = wineSaleRepository.save(wineSale)
+
+        return wineSaleMapper.toWineSaleDto(savedWineSale)
     }
 }

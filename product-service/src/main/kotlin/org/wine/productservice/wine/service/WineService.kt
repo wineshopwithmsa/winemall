@@ -163,15 +163,5 @@ class WineService @Autowired constructor(
         }
     }
 
-    @Transactional
-    fun addWineSale(requestDto: WineSaleCreateRequestDto): WineSaleDto {
-        val userId = authService.getAccountId()
-        val wineSale = wineSaleMapper.toWineSale(requestDto)
 
-        wineSale.sellerId = userId
-
-        val savedWineSale = wineSaleRepository.save(wineSale)
-
-        return wineSaleMapper.toWineSaleDto(savedWineSale)
-    }
 }
