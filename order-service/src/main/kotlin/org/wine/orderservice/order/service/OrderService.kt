@@ -108,7 +108,7 @@ class OrderService  @Autowired constructor(
     suspend fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto): OrderPriceResponseDto{
 
         val sumPrice = calculatePrice(orderPriceRequestDto)
-        val finalPrice = applyCoupon(sumPrice, orderPriceRequestDto.couponID)
+        val finalPrice = applyCoupon(sumPrice, orderPriceRequestDto.couponId)
 
         return OrderPriceResponseDto(
             sumPrice = sumPrice,
