@@ -1,5 +1,5 @@
 package org.wine.orderorchestrator.orderorchestrator.transcation.event
 
-data class OrderCompleted(
+data class OrderCompletedEvent(
     val orderId : Long
 )

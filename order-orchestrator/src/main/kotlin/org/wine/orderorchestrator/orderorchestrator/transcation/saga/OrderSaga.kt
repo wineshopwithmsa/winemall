@@ -1,6 +1,7 @@
 package org.wine.orderorchestrator.orderorchestrator.transcation.saga
 
 import org.apache.kafka.common.network.Send
+import org.wine.orderorchestrator.orderorchestrator.order.dto.OrderDto
 import org.wine.orderorchestrator.orderorchestrator.transcation.TransactionEventPublisher
 import org.wine.orderorchestrator.orderorchestrator.transcation.event.OrderCreateEvent
 import org.wine.orderorchestrator.orderorchestrator.transcation.state.OrderPending
@@ -12,10 +13,9 @@ class OrderSaga private constructor(
     private val eventPublisher : TransactionEventPublisher,
     private var orderState : OrderSagaState,
     val orderId : Long,
-    val customerId : Long,
-    val wineSaleId : Long,
+    val memberId : Long,
+    val wineOrderList : List<OrderDto>,
     val couponId : Long,
-    val quantity : Int,
     val key : String
 ){
 
@@ -28,9 +28,8 @@ class OrderSaga private constructor(
             eventPublisher = eventPublisher,
             orderState = OrderPending(),
             orderId = event.orderId,
-            customerId = event.customerId,
-            wineSaleId = event.winSaleId,
-            quantity = event.quantity,
+            memberId = event.memberId,
+            wineOrderList = event.wineOrderList,
             couponId = event.couponId,
             key = key
         )

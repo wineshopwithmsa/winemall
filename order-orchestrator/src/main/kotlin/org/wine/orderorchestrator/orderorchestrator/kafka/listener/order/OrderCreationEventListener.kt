@@ -1,6 +1,7 @@
 package org.wine.orderorchestrator.orderorchestrator.kafka.listener.order
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import lombok.extern.slf4j.Slf4j
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
@@ -15,6 +16,7 @@ import org.wine.orderorchestrator.orderorchestrator.transcation.topic.OrderTopic
 
 
 @Component
+@Slf4j
 class OrderCreationEventListener(
     private val eventPublisher: TransactionEventPublisher,
     private val objectMapper: ObjectMapper
