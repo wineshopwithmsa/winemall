@@ -68,6 +68,9 @@ dependencies {
     //local test
     runtimeOnly 'com.h2database:h2'
 
+    // test
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 }
 
 kotlin {

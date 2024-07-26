@@ -39,13 +39,6 @@ class WineService @Autowired constructor(
         return wineMapper.toWineDto(wine)
     }
 
-    fun getWineSaleInfo(wineIdList: List<WinePriceRequestDto>): List<WineSaleDto> {
-        var wines = wineSaleRepository.findAllByWineSaleIdIn(wineIdList.map{it.wineSaleId})
-
-        return wines.stream()
-            .map{wineSaleMapper.toWineSaleDto(it)}
-            .collect(Collectors.toList())
-    }
 
     fun getWines(
         page: Int,
@@ -54,7 +47,7 @@ class WineService @Autowired constructor(
         categoryIds: List<Long>? = null
     ): PaginatedWineResponseDto {
         val pageable = PageRequest.of(page - 1, perPage)
-        val specification = Specification<Wine> { root, query, criteriaBuilder ->
+        val specification = Specification<Wine> { root, _, criteriaBuilder ->
             val predicates = mutableListOf<Predicate>()
 
             regionIds?.let { ids ->
@@ -169,7 +162,6 @@ class WineService @Autowired constructor(
             }
         }
     }
-
 
 
 }

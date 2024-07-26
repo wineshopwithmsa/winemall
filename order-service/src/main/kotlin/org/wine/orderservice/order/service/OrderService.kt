@@ -49,10 +49,9 @@ class OrderService  @Autowired constructor(
 
     //와인 가격 총합 금액
     suspend fun calculatePrice(orderPriceRequestDto: OrderPriceRequestDto): Int{
-        val wineSaleWebClientResponse = webClient.post()
-            .uri(productService + "/api/wines/v1/sale")
-           .contentType(MediaType.APPLICATION_JSON)
-           .body(BodyInserters.fromValue(orderPriceRequestDto.productList))
+        val wineSaleIdsParam = orderPriceRequestDto.productList.map { it.wineSaleId }.joinToString(",")
+        val wineSaleWebClientResponse = webClient.get()
+            .uri("$productService/api/wine-sales/v1?ids=$wineSaleIdsParam")
             .retrieve()
             .awaitBodyOrNull<Response<List<WineSaleDto>>>() ?: throw Exception("Received null response")
 
