@@ -1,4 +1,4 @@
-package org.wine.orderservice.kafka.publisher
+package org.wine.orderservice.common.kafka.publisher
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate

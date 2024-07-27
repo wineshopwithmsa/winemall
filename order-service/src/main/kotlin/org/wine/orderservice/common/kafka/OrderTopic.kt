@@ -1,4 +1,4 @@
-package org.wine.orderservice.kafka
+package org.wine.orderservice.common.kafka
 
 object OrderTopic {
     const val ORDER_CREATED = "ORDER-CREATED"

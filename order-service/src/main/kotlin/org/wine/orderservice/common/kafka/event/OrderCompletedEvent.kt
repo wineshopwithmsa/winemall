@@ -1,4 +1,4 @@
-package org.wine.orderservice.kafka.event
+package org.wine.orderservice.common.kafka.event
 
 data class OrderCompletedEvent(
     val orderId : Long

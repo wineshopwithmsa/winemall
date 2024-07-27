@@ -1,53 +1,35 @@
-package org.wine.orderorchestrator.orderorchestrator.kafka.config
+package org.wine.orderservice.common.kafka.config
 
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.AcknowledgingMessageListener
-import org.wine.orderorchestrator.orderorchestrator.kafka.listener.order.ApplyCouponCompletedEvent
-import org.wine.orderorchestrator.orderorchestrator.kafka.listener.order.ApplyCouponFailedListener
-import org.wine.orderorchestrator.orderorchestrator.kafka.listener.order.CheckStockCompletedListener
-import org.wine.orderorchestrator.orderorchestrator.kafka.listener.order.OrderCreationEventListener
+import org.wine.orderservice.common.kafka.event.OrderCompletedEvent
+import org.wine.orderservice.common.kafka.listener.order.OrderCompletedEventListener
+import org.wine.orderservice.common.kafka.listener.order.OrderRollbackEventListener
 import java.net.InetAddress
 import java.net.UnknownHostException
-import java.util.UUID
+import java.util.*
 
 @Configuration
 class KafkaConsumerConfig(
-    val kafkaProperties: KafkaProperties) {
+    val kafkaProperties: KafkaProperties
+) {
 
     @Bean
-    fun applyCouponCompletedEventListenerContainerFactory(applyCouponCompletedEvent: ApplyCouponCompletedEvent): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(applyCouponCompletedEvent)
+    fun orderCreationEventListenerContainerFactory(orderCompletedEventListener: OrderCompletedEventListener): ConcurrentKafkaListenerContainerFactory<String, String> {
+        return kafkaListenerContainerFactory(orderCompletedEventListener)
     }
 
     @Bean
-    fun applyCouponFailedListenerContainerFactory(applyCouponFailedListener: ApplyCouponFailedListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(applyCouponFailedListener)
+    fun orderProductCheckFailedEventListenerContainerFactory(orderRollBackedEventListener: OrderRollbackEventListener): ConcurrentKafkaListenerContainerFactory<String, String> {
+        return kafkaListenerContainerFactory(orderRollBackedEventListener)
     }
-
-    @Bean
-    fun checkStockCompletedListenerContainerFactory(checkStockCompletedListener: CheckStockCompletedListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(checkStockCompletedListener)
-    }
-
-    @Bean
-    fun checkStockFailedListenerContainerFactory(checkStockFailedListener: ApplyCouponFailedListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(checkStockFailedListener)
-    }
-
-    @Bean
-    fun orderCreationEventListenerContainerFactory(orderCreationEventListener: OrderCreationEventListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(orderCreationEventListener)
-    }
-
-
 
     fun kafkaListenerContainerFactory(listener: AcknowledgingMessageListener<String, String>): ConcurrentKafkaListenerContainerFactory<String, String> {
         val containerFactory = ConcurrentKafkaListenerContainerFactory<String, String>()

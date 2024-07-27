@@ -21,8 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
 import org.wine.orderservice.order.repository.OrderRepository
-import org.wine.orderservice.kafka.publisher.TransactionEventPublisher
-import org.wine.orderservice.kafka.event.OrderCreateEvent
+import org.wine.orderservice.common.kafka.publisher.TransactionEventPublisher
+import org.wine.orderservice.common.kafka.event.OrderCreateEvent
 import org.wine.orderservice.order.WineSaleDto
 import org.wine.orderservice.order.dto.CouponDto
 import org.wine.orderservice.order.dto.DiscountType

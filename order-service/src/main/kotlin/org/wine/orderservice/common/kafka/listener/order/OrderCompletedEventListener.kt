@@ -1,4 +1,4 @@
-package org.wine.orderservice.kafka.listener.order
+package org.wine.orderservice.common.kafka.listener.order
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import lombok.extern.slf4j.Slf4j
@@ -8,14 +8,14 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.listener.AcknowledgingMessageListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
-import org.wine.orderservice.kafka.OrderTopic
-import org.wine.orderservice.kafka.event.OrderCompletedEvent
-import org.wine.orderservice.kafka.publisher.TransactionEventPublisher
+import org.wine.orderservice.common.kafka.OrderTopic
+import org.wine.orderservice.common.kafka.event.OrderCompletedEvent
+import org.wine.orderservice.common.kafka.publisher.TransactionEventPublisher
 import org.wine.orderservice.order.service.OrderService
 
 
 @Component
-@Slf4j
+
 class OrderCompletedEventListener (
     private val orderService: OrderService,
     private val objectMapper: ObjectMapper
