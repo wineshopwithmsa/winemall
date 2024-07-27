@@ -4,6 +4,7 @@ import ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -32,8 +33,10 @@ class WineSaleController @Autowired constructor(
 
     @PostMapping("/v1")
     @WineApiSpec.CreateWine
-    fun createWineSale(@Valid @RequestBody requestDto: WineSaleCreateRequestDto): ResponseEntity<ApiResponse<Any>> {
-        val wineSale = wineSaleService.addWineSale(requestDto)
+    fun createWineSale(@Valid @RequestBody requestDto: WineSaleCreateRequestDto,
+                       @RequestHeader headers: HttpHeaders
+    ): ResponseEntity<ApiResponse<Any>> {
+        val wineSale = wineSaleService.addWineSale(requestDto, headers)
         val location = URI.create("/api/wine-sales/v1/${wineSale.id}")
         return ResponseEntity.created(location)
             .body(ApiResponse.Success(

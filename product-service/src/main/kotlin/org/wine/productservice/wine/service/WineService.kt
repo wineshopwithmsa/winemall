@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
-import org.wine.productservice.auth.AuthService
 import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
 import org.wine.productservice.wine.entity.Wine
@@ -14,15 +13,16 @@ import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.mapper.WinePaginationMapper
 import jakarta.persistence.criteria.Predicate
+import org.springframework.http.HttpHeaders
+import org.springframework.web.servlet.function.ServerRequest
+import org.wine.productservice.auth.AuthService
 import org.wine.productservice.wine.mapper.WineSaleMapper
 import org.wine.productservice.wine.repository.*
-import java.util.stream.Collectors
 import javax.swing.plaf.synth.Region
 
 @Service
 class WineService @Autowired constructor(
     private val authService: AuthService,
-
     private val wineMapper: WineMapper,
     private val wineSaleMapper: WineSaleMapper,
     private val winePaginationMapper: WinePaginationMapper,
@@ -68,9 +68,8 @@ class WineService @Autowired constructor(
     }
 
     @Transactional
-    fun addWine(wineDto: WineCreateRequestDto): WineDto {
-        val userId = authService.getAccountId()
-
+    fun addWine(wineDto: WineCreateRequestDto, headers: HttpHeaders): WineDto {
+        val userId = authService.getAccountId(headers)
         val region = regionRepository.findById(wineDto.regionId).
                     orElseThrow { InvalidRegionException(wineDto.regionId) }
         val categories = getCategoriesFromIds(wineDto.categoryIds)

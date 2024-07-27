@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.wine.productservice.config.WineApiSpec
 import org.wine.productservice.shared.validator.ValidIds
@@ -50,8 +52,9 @@ class WineController @Autowired constructor(
 
     @PostMapping("/v1")
     @WineApiSpec.CreateWine
-    fun createWine(@Valid @RequestBody requestDto: WineCreateRequestDto): ResponseEntity<ApiResponse<Any>> {
-        val wine = wineService.addWine(requestDto)
+    fun createWine(@Valid @RequestBody requestDto: WineCreateRequestDto,
+                   @RequestHeader headers: HttpHeaders): ResponseEntity<ApiResponse<Any>> {
+        val wine = wineService.addWine(requestDto, headers)
         val location = URI.create("/api/wines/v1/${wine.id}")  // 새로 생성된 와인의 URI를 생성합니다.
         return ResponseEntity.created(location)
             .body(ApiResponse.Success(
