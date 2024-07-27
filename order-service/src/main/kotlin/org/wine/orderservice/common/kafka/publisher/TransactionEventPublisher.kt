@@ -1,4 +1,4 @@
-package org.wine.orderservice.kafka.publisher
+package org.wine.orderservice.common.kafka.publisher
 
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.SenderResult

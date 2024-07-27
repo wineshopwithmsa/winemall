@@ -50,5 +50,13 @@ class Order (
     @LastModifiedDate
     @Column(name = "UPDATED_AT", nullable = true)
     var updatedAt: Instant? = null
-)
+){
+    fun approve() {
+        this.status = OrderStatus.ORDER_COMPLETED
+    }
+
+    fun cancel(){
+        this.status = OrderStatus.ORDER_FAILED
+    }
+}
 

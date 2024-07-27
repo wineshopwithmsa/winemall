@@ -3,7 +3,7 @@ package org.wine.orderorchestrator.orderorchestrator.kafka.publisher
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Component
-import org.wine.orderorchestrator.orderorchestrator.transcation.TransactionEventPublisher
+import org.wine.orderorchestrator.orderorchestrator.order.transcation.TransactionEventPublisher
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.SenderResult
 
