@@ -30,13 +30,13 @@ class CheckStockEventListener(
     @KafkaListener(topics = [OrderTopic.CHECK_STOCK], groupId = "order")
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
         val (key, event) = data.key() to objectMapper.readValue(data.value(), CheckStockEvent::class.java)
-        logger.info("Topic: ${OrderTopic.ORDER_COMPLETED}, key = $key, event: $event")
+        logger.info("Topic: ${OrderTopic.CHECK_STOCK}, key = $key, event: $event")
         try{
             val totalPrice : Int = wineSaleService.checkStockAndSubtractStock(event)
             transactionEventPublisher.publishEvent(
                 topic = OrderTopic.CHECK_STOCK_COMPLETED,
                 key = key,
-                event = CheckStockCompleted(totalPrice)
+                event = CheckStockCompleted(event.orderId, totalPrice)
             )
         }
         catch (e: Exception){
@@ -45,7 +45,7 @@ class CheckStockEventListener(
             transactionEventPublisher.publishEvent(
                 topic = OrderTopic.CHECK_STOCK_FAILED,
                 key = key,
-                event = CheckStockFailed(e.message!!)
+                event = CheckStockFailed(event.orderId, e.message!!)
             )
         }.let{
             boundedElasticScope.launch {

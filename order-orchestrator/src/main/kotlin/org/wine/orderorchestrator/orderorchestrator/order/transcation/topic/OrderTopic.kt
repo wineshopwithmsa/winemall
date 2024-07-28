@@ -2,7 +2,11 @@ package org.wine.orderorchestrator.orderorchestrator.order.transcation.topic
 
 object OrderTopic {
     const val ORDER_CREATED = "ORDER-CREATED"
+
     const val ORDER_COMPLETED = "ORDER-COMPLETED"
+    const val ORDER_FAILED = "ORDER-FAILED"
+
+    const val CEHCK_STOCK = "CHECK-STOCK"
 
     const val  CHECK_STOCK_COMPLETED = "CHECK-STOCK-COMPLETED"
     const val  CHECK_STOCK_FAILED = "CHECK-STOCK-FAILED"
