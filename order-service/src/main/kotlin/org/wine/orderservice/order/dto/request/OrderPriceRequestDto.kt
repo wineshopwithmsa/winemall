@@ -8,5 +8,5 @@ data class OrderPriceRequestDto(
 
     @field:Size(min = 1, message = "At most 1 order required")
     val productList: List<OrderDto>,
-    val couponId : Long
+    val couponId : Long? = null
 )

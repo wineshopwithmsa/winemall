@@ -84,8 +84,8 @@ class OrderService  @Autowired constructor(
 
 
     //쿠폰 적용가
-    suspend fun applyCoupon(originPrice : Int, couponId : Long): Int{
-        if(couponId == 0L) return originPrice
+    suspend fun applyCoupon(originPrice : Int, couponId : Long?): Int{
+        if(couponId == null) return originPrice
 
         var finalPrice : Int = originPrice
 
