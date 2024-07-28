@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponses
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -51,12 +52,12 @@ class OrderController @Autowired constructor(
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-    suspend fun orderWine(@RequestBody orderRequestDto: OrderRequestDto,
+    suspend fun orderWine(@Valid @RequestBody orderRequestDto: OrderRequestDto,
                           @RequestParam(required = false, defaultValue = "") rsrvDate: String,
                           @RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
         orderService.createOrder(orderRequestDto, rsrvDate, headers)
 
-        return ApiResponse.Success(HttpStatus.OK.value(), message = "success", data= null)
+        return ApiResponse.Success(HttpStatus.OK.value(), message = "success")
     }
 
 
@@ -64,12 +65,12 @@ class OrderController @Autowired constructor(
     @ApiOperation(value = "주문총금액, 쿠폰 적용가 조회")
     @ApiImplicitParams(value = [
         ApiImplicitParam(name ="productIdList", value = "구매하고자하는 상품의 ID list(필수)", dataType = "List<Long>", required = true),
-        ApiImplicitParam(name = "couponIdList", value = "적용하고자하는 쿠폰의 ID list", dataType = "List<Long>", required = false)
+        ApiImplicitParam(name = "couponId", value = "적용하고자하는 쿠폰의 ID", dataType = "Long", required = false)
     ])
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-    suspend fun getPrice(@RequestBody orderPriceDto: OrderPriceRequestDto): ApiResponse<Any> {
+    suspend fun getPrice(@Valid @RequestBody orderPriceDto: OrderPriceRequestDto): ApiResponse<Any> {
         val orderPrice : OrderPriceResponseDto = orderService.getOrderPrice(orderPriceDto)
 
         return ApiResponse.Success(

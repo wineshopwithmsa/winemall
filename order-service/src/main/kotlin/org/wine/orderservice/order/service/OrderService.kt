@@ -85,6 +85,7 @@ class OrderService  @Autowired constructor(
 
     //쿠폰 적용가
     suspend fun applyCoupon(originPrice : Int, couponId : Long): Int{
+        if(couponId == 0L) return originPrice
 
         var finalPrice : Int = originPrice
 
@@ -136,7 +137,7 @@ class OrderService  @Autowired constructor(
                         orderId = order.orderId,
                         wineOrderList = orderRequestDto.wineList,
                         couponId = orderRequestDto.couponId,
-                        memberId = orderRequestDto.memberId
+                        memberId = memberId
                     )
                 ).then(Mono.just(Unit))
                     .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
