@@ -4,6 +4,7 @@ import org.wine.couponservice.coupon.entity.DiscountType
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+
 data class CouponResponseDTO(
     val couponId: Long,
     val code: String,
@@ -11,4 +12,5 @@ data class CouponResponseDTO(
     val discountType: DiscountType,
     val discountValue: Double,
     val expiryDate: LocalDateTime
+    val expiryDate: LocalDate
 )

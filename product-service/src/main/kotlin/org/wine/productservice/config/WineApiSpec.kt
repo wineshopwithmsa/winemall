@@ -2,6 +2,7 @@ package org.wine.productservice.config
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
@@ -35,6 +36,14 @@ open class ApiResponseBadRequest {
     val message: String = ""
 }
 
+open class ApiResponseNotFound {
+    @field:Schema(example = "400")
+    val status: Int = 0
+
+    @field:Schema(example = "Bad Request")
+    val message: String = ""
+}
+
 open class ApiResponseServerError {
     @field:Schema(example = "500")
     val status: Int = 0
@@ -44,10 +53,38 @@ open class ApiResponseServerError {
 }
 
 class GetWines200: ApiResponseSuccess<WinesResponse>()
+class GetWine200: ApiResponseSuccess<WineResponse>()
 class CreateWine201: ApiResponseCreated<WineResponse>()
 class UpdateWine200: ApiResponseCreated<WineResponse>()
 
+class GetWineSales200: ApiResponseSuccess<WineSalesResponse>()
+
 object WineApiSpec {
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Operation(
+        summary = "와인 상세 조회",
+        description = "와인 상세 정보를 조회합니다.",
+        responses = [
+            SwaggerApiResponse(
+                responseCode = "200",
+                description = "입력받은 wine id로 와인 상세 정보 조회 성공",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWine200::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "404",
+                description = "입력받은 wine id에 대한 와인을 찾을 수 없음.",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseNotFound::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "500",
+                description = "서버 에러",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseServerError::class))]
+            ),
+        ]
+    )
+    annotation class GetWine
+
     @Target(AnnotationTarget.FUNCTION)
     @Retention(AnnotationRetention.RUNTIME)
     @Operation(
@@ -85,8 +122,9 @@ object WineApiSpec {
         ),
         responses = [
             SwaggerApiResponse(
-                responseCode = "200",
+                responseCode = "201",
                 description = "와인 생성 성공 후 생성된 와인 정보 반환",
+                headers = [Header(name = "Location", description = "URL of the newly created wine resource", schema = Schema(type = "string"))],
                 content = [Content(mediaType = "application/json", schema = Schema(implementation = CreateWine201::class))]
             ),
             SwaggerApiResponse(
@@ -160,4 +198,24 @@ object WineApiSpec {
         ]
     )
     annotation class UpdateWine
+
+    @Target(AnnotationTarget.FUNCTION)
+    @Retention(AnnotationRetention.RUNTIME)
+    @Operation(
+        summary = "와인 판매 목록 조회",
+        description = "와인 판매 목록을 조회합니다.",
+        responses = [
+            SwaggerApiResponse(
+                responseCode = "200",
+                description = "와인 판매 목록 조회 성공",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = GetWineSales200::class))]
+            ),
+            SwaggerApiResponse(
+                responseCode = "500",
+                description = "서버 에러",
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = ApiResponseServerError::class))]
+            ),
+        ]
+    )
+    annotation class GetWineSales
 }

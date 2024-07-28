@@ -2,31 +2,69 @@ package org.wine.productservice.wine.service
 
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.dto.WineCreateRequestDto
-import org.wine.productservice.wine.dto.WineDto
-import org.wine.productservice.wine.dto.WineUpdateRequestDto
+import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
+import org.wine.productservice.wine.entity.Wine
 import org.wine.productservice.wine.entity.WineCategory
 import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
-import org.wine.productservice.wine.repository.CategoryRepository
-import org.wine.productservice.wine.repository.RegionRepository
-import org.wine.productservice.wine.repository.WineCategoryRepository
-import org.wine.productservice.wine.repository.WineRepository
+import org.wine.productservice.wine.mapper.WinePaginationMapper
+import jakarta.persistence.criteria.Predicate
+import org.wine.productservice.wine.mapper.WineSaleMapper
+import org.wine.productservice.wine.repository.*
+import java.util.stream.Collectors
+import javax.swing.plaf.synth.Region
 
 @Service
 class WineService @Autowired constructor(
-    private val wineRepository: WineRepository,
+    private val authService: AuthService,
+
     private val wineMapper: WineMapper,
+    private val wineSaleMapper: WineSaleMapper,
+    private val winePaginationMapper: WinePaginationMapper,
+
+    private val wineRepository: WineRepository,
     private val regionRepository: RegionRepository,
     private val categoryRepository: CategoryRepository,
     private val wineCategoryRepository: WineCategoryRepository,
-    private val authService: AuthService,
+    private val wineSaleRepository: WineSaleRepository
 ) {
-    fun getWinesForSeller(): List<WineDto> {
-        return wineRepository.findAll().map { wine -> WineDto.fromWine(wine) }
+    fun getWine(wineId: Long): WineDto {
+        var wine = wineRepository.findById(wineId)
+            .orElseThrow { WineNotFoundException(wineId)}
+        return wineMapper.toWineDto(wine)
+    }
+
+
+    fun getWines(
+        page: Int,
+        perPage: Int,
+        regionIds: List<Long>? = null,
+        categoryIds: List<Long>? = null
+    ): PaginatedWineResponseDto {
+        val pageable = PageRequest.of(page - 1, perPage)
+        val specification = Specification<Wine> { root, _, criteriaBuilder ->
+            val predicates = mutableListOf<Predicate>()
+
+            regionIds?.let { ids ->
+                predicates.add(root.get<Region>("region").get<Long>("id").`in`(ids))
+            }
+
+            categoryIds?.let { ids ->
+                val joinWineCategory = root.join<Wine, WineCategory>("categories")
+                val joinCategory = joinWineCategory.join<WineCategory, Category>("category")
+                predicates.add(joinCategory.get<Long>("id").`in`(ids))
+            }
+
+            criteriaBuilder.and(*predicates.toTypedArray())
+        }
+
+        val winesPage = wineRepository.findAll(specification, pageable)
+        return winePaginationMapper.toPaginatedWineResponse(winesPage, "/api/wines")
     }
 
     @Transactional
@@ -124,5 +162,6 @@ class WineService @Autowired constructor(
             }
         }
     }
+
 
 }

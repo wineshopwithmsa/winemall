@@ -1,8 +1,12 @@
 server:
-  port: 9093
+  port: 6012
 
 spring:
   jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
@@ -16,6 +20,12 @@ logging:
     root: DEBUG
     org.springframework: DEBUG
     org.wine: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID} --- [%15.15t] %-40.40logger{39} : %m%n%wEx"
+
 
 springdoc:
   api-docs:
@@ -24,3 +34,4 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
   override-with-generic-response: false
+
