@@ -1,11 +1,12 @@
 package org.wine.userservice.user.entity
 
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
 import lombok.Builder
 import lombok.Getter
 import lombok.NoArgsConstructor
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.wine.userservice.address.entity.Address
+import org.wine.userservice.membercoupon.entity.MemberCoupon
 
 @Entity
 @Table(name = "member")
@@ -34,9 +35,14 @@ class Member(
         joinColumns = [JoinColumn(name = "member_id", referencedColumnName = "user_id")],
         inverseJoinColumns = [JoinColumn(name = "role_id", referencedColumnName = "id")]
     )
-    private val roles: Set<MemberRole> = HashSet()
+    private val roles: Set<MemberRole> = HashSet(),
+
+    @OneToMany(mappedBy = "member", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val memberCoupons: List<MemberCoupon> = mutableListOf(),
+
+    @OneToMany(mappedBy = "member", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val address: List<Address> = mutableListOf()
 ) {
-    constructor() : this(email = "", password = "")
 
     fun getUserId(): Long = userId
     fun getEmail(): String = email

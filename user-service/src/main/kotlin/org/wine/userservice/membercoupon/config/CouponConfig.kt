@@ -1,4 +1,4 @@
-package org.wine.userservice.usercoupon.gateway
+package org.wine.userservice.membercoupon.config
 
 import org.springframework.context.annotation.Configuration
 

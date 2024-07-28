@@ -29,7 +29,7 @@ class MemberController @Autowired constructor(
     }
 
     @PostMapping("/v1/login")
-    suspend fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+    fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
         return memberService.toLogin(authRequestDTO)
     }
 
