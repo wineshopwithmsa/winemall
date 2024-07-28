@@ -35,7 +35,7 @@ class StockRollbackEventListener(
             transactionEventPublisher.publishEvent(
                 topic = OrderTopic.ORDER_ROLLBACK,
                 key = key,
-                event = OrderRollbackEvent(event.orderId)
+                event = OrderRollbackEvent(event.orderId, event.failureMessage)
             ).awaitFirstOrNull()
         }
 

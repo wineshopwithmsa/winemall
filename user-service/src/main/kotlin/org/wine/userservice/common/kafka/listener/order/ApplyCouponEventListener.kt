@@ -33,7 +33,7 @@ class ApplyCouponEventListener(
             memberCouponService.useCouponMember(event.couponId)
 
             transactionEventPublisher.publishEvent(
-                topic = OrderTopic.CHECK_STOCK_COMPLETED,
+                topic = OrderTopic.APPLY_COUPON_COMPLETED,
                 key = key,
                 event = ApplyCouponCompletedEvent(event.orderId)
             )
@@ -42,7 +42,7 @@ class ApplyCouponEventListener(
             logger.info("Check Stock Failed, error: "+ e.message)
 
             transactionEventPublisher.publishEvent(
-                topic = OrderTopic.CHECK_STOCK_FAILED,
+                topic = OrderTopic.APPLY_COUPON_FAILED,
                 key = key,
                 event = ApplyCouponFailedEvent(event.orderId, e.message!!)
             )
