@@ -31,9 +31,6 @@ data class Coupon(
     var expiryDate: LocalDateTime = LocalDateTime.now()
 ){
     constructor() : this(0, "", "", DiscountType.PERCENTAGE, 0.0, LocalDateTime.now())
-    var expiryDate: LocalDate = LocalDate.now()
-){
-    constructor() : this(0, "", "", DiscountType.PERCENTAGE, 0.0, LocalDate.now())
 }
 
 enum class DiscountType {
