@@ -7,7 +7,7 @@ import org.wine.userservice.user.entity.Member
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "member_coupoon")
+@Table(name = "member_coupon")
 @EntityListeners(AuditingEntityListener::class)
 class MemberCoupon (
     @Id

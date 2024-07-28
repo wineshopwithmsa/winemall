@@ -1,7 +1,6 @@
 package org.wine.userservice.membercoupon.controller
 
 import ApiResponse
-import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.*
 import org.wine.userservice.common.config.MemberCouponApiSpec
@@ -11,7 +10,7 @@ import org.wine.userservice.membercoupon.service.MemberCouponService
 
 @RestController
 @RequestMapping("/api/membercoupon")
-@Tag(name = "MemberCoupon", description = "유저 쿠폰 관련 API")
+//@Tag(name = "MemberCoupon", description = "유저 쿠폰 관련 API")
 class MemberCouponController(private val memberCouponService: MemberCouponService) {
 
     @GetMapping("/v1/coupons")

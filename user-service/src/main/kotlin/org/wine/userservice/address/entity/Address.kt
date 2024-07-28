@@ -37,5 +37,13 @@ class Address (
     var member: Member
 
 ){
-
+    constructor() : this(
+        addressId = 0L,
+        address = "",
+        addressDetail = "",
+        postalCode = "",
+        city = "",
+        addrOrder = 0,
+        member = Member()
+    )
 }
