@@ -9,9 +9,9 @@ import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.Orde
 class OrderPending : OrderSagaState {
     override suspend fun operate(saga: OrderSaga) {
         saga.publishEvent(
-            OrderTopic.ORDER_COMPLETED,//CheckStockEvent로 수정(테스트를 위해 order_completed로 임시 세팅)
+            OrderTopic.CEHCK_STOCK,//CheckStockEvent로 수정(테스트를 위해 order_completed로 임시 세팅)
             saga.key,
-            OrderCompletedEvent(saga.orderId) //CheckStockEvent로 수정
+            CheckStockEvent(saga.orderId, saga.wineOrderList) //CheckStockEvent로 수정
         ).awaitSingle()
     }
 

@@ -1,17 +1,18 @@
 package org.wine.orderorchestrator.orderorchestrator.order.transcation.state
 
 import kotlinx.coroutines.reactive.awaitSingle
-import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.ApplyCouponEvent
-import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.StockRollbackEvent
+import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.CheckStockFailedEvent
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.saga.OrderSaga
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.OrderTopic
 
-class CouponApplyFailed : OrderSagaState {
+class CouponApplyFailed(
+    val failureMessage: String
+) : OrderSagaState {
     override suspend fun operate(saga: OrderSaga) {
         saga.publishEvent(
             OrderTopic.STOCK_ROLLBACK,
             saga.key,
-            StockRollbackEvent(saga.wineOrderList)
+            CheckStockFailedEvent(saga.orderId, saga.wineOrderList, failureMessage)
         ).awaitSingle()
     }
 }

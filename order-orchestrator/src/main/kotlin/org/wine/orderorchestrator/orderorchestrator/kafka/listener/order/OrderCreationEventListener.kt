@@ -11,6 +11,7 @@ import org.springframework.kafka.listener.AcknowledgingMessageListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 import org.wine.orderorchestrator.orderorchestrator.coroutine.boundedElasticScope
+import org.wine.orderorchestrator.orderorchestrator.order.repository.SagaRepository
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.TransactionEventPublisher
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.OrderCreateEvent
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.saga.OrderSaga
@@ -22,6 +23,7 @@ import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.Orde
 @Slf4j
 class OrderCreationEventListener(
     private val eventPublisher: TransactionEventPublisher,
+    private val sagaRepository: SagaRepository,
     private val objectMapper: ObjectMapper
 ): AcknowledgingMessageListener<String, String> {
 
@@ -31,8 +33,9 @@ class OrderCreationEventListener(
         val (key, event) = data.key() to objectMapper.readValue(data.value(), OrderCreateEvent::class.java)
         logger.info("Topic: $OrderTopic.ORDER_CREATED, key = $key, event: $event")
 
-        val orderSaga = OrderSaga.init(eventPublisher, key, event, OrderPending())
+        val orderSaga = OrderSaga.init(eventPublisher, key, event)
 
+        sagaRepository.save(key, orderSaga)
         boundedElasticScope.launch {
             orderSaga.operate()
         }

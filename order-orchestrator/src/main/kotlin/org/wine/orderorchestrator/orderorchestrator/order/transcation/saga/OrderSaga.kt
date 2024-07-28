@@ -16,23 +16,24 @@ class OrderSaga private constructor(
     val memberId : Long,
     val wineOrderList : List<OrderDto>,
     val couponId : Long,
-    val key : String
+    val key : String,
+    var totalPrice: Int
 ){
 
     companion object{
         fun init(
             eventPublisher : TransactionEventPublisher,
             key : String,
-            event : OrderCreateEvent,
-            orderState: OrderSagaState
+            event : OrderCreateEvent
         ): OrderSaga = OrderSaga(
             eventPublisher = eventPublisher,
-            orderState = orderState,
+            orderState = OrderPending(),
             orderId = event.orderId,
             memberId = event.memberId,
             wineOrderList = event.wineOrderList,
             couponId = event.couponId,
-            key = key
+            key = key,
+            totalPrice = 0
         )
     }
     suspend fun operate() {

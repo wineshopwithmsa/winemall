@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.util.UriComponentsBuilder
+import org.wine.orderservice.common.kafka.OrderTopic
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
 import org.wine.orderservice.order.repository.OrderRepository
@@ -125,11 +126,11 @@ class OrderService  @Autowired constructor(
             order
         ).let{
                 transactionEventPublisher.publishEvent(
-                    topic = "ORDER-CREATED",
+                    topic = OrderTopic.ORDER_CREATED,
                     key = UUID.randomUUID().toString().replace("-", ""),
                     event = OrderCreateEvent(
                         orderId = order.orderId,
-                        wineList = orderRequestDto.wineList,
+                        wineOrderList = orderRequestDto.wineList,
                         couponId = orderRequestDto.couponId,
                         memberId = orderRequestDto.memberId
                     )

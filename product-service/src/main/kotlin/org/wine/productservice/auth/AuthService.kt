@@ -1,6 +1,7 @@
 package org.wine.productservice.auth
 
 import jwt.JwtTokenProvider
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
 import org.wine.productservice.wine.exception.UnauthorizedException
 
@@ -10,8 +11,8 @@ class AuthService(
 ) {
     private val jwtTokenProvider: JwtTokenProvider = JwtTokenProvider()
 
-    fun getAccountId(): Long {
-        val token = tokenExtractor.extract()
+    fun getAccountId(headers: HttpHeaders): Long {
+        val token = tokenExtractor.extract(headers)
             ?: throw UnauthorizedException("JWT is not present")
 
         return try {

@@ -58,4 +58,16 @@ class WineSale(
         this.stockQuantity = quantity
         this.soldQuantity = 0
     }
+
+    fun subtract(subtractCount: Int): Int {
+        if (stockQuantity < subtractCount) throw Exception()
+
+        return (price * subtractCount).also {
+            stockQuantity -= subtractCount
+        }
+    }
+
+    fun increment(count: Int) {
+        this.stockQuantity += count
+    }
 }

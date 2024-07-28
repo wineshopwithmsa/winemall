@@ -10,7 +10,9 @@ import org.springframework.kafka.listener.AcknowledgingMessageListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 import org.wine.orderorchestrator.orderorchestrator.coroutine.boundedElasticScope
+import org.wine.orderorchestrator.orderorchestrator.order.repository.SagaRepository
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.TransactionEventPublisher
+import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.CheckStockCompletedEvent
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.OrderCreateEvent
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.saga.OrderSaga
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.state.CouponApplied
@@ -21,20 +23,26 @@ import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.Orde
 @Slf4j
 class CheckStockCompletedListener(
     private val eventPublisher: TransactionEventPublisher,
+    private val sagaRepository: SagaRepository,
     private val objectMapper: ObjectMapper
 ): AcknowledgingMessageListener<String, String> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     @KafkaListener(topics = [OrderTopic.CHECK_STOCK_COMPLETED], groupId = "order-orchestrator")
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
-        val (key, event) = data.key() to objectMapper.readValue(data.value(), OrderCreateEvent::class.java)
+        val (key, event) = data.key() to objectMapper.readValue(data.value(), CheckStockCompletedEvent::class.java)
         logger.info("Topic: ${OrderTopic.CHECK_STOCK_COMPLETED}, key = $key, event: $event")
 
-        val orderSaga = OrderSaga.init(eventPublisher, key, event, StockChecked())
 
-        boundedElasticScope.launch {
-            orderSaga.operate()
+        sagaRepository.findById(key)?.let{
+            sagaRepository.updatePrice(key, it.totalPrice)
+            boundedElasticScope.launch {
+                it.changeStateAndOperate(
+                    StockChecked()
+                )
+            }
         }
+
 
         acknowledgment?.acknowledge()
     }

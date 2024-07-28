@@ -4,17 +4,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.AcknowledgingMessageListener
-import org.wine.orderservice.common.kafka.event.OrderCompletedEvent
+
 import org.wine.orderservice.common.kafka.listener.order.OrderCompletedEventListener
 import org.wine.orderservice.common.kafka.listener.order.OrderRollbackEventListener
-import java.net.InetAddress
-import java.net.UnknownHostException
-import java.util.*
 
 @Configuration
 class KafkaConsumerConfig(
@@ -44,11 +40,6 @@ class KafkaConsumerConfig(
     }
 
     private fun consumerProperties(): Map<String, Any> {
-        val hostName: String = try {
-            InetAddress.getLocalHost().hostName + UUID.randomUUID().toString()
-        } catch (e: UnknownHostException) {
-            UUID.randomUUID().toString()
-        }
         return hashMapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ConsumerConfig.GROUP_ID_CONFIG to kafkaProperties.consumer.groupId,

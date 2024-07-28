@@ -7,7 +7,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
-import org.wine.productservice.auth.AuthService
 import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.entity.Category
 import org.wine.productservice.wine.entity.Region
