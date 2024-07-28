@@ -35,7 +35,7 @@ class OrderFailedEventListener(
         sagaRepository.findById(key)?.let{
             boundedElasticScope.launch {
                 it.changeStateAndOperate(
-                    OrderFailed()
+                    OrderFailed(event.failureMessage)
                 )
             }
             sagaRepository.deleteById(key)
