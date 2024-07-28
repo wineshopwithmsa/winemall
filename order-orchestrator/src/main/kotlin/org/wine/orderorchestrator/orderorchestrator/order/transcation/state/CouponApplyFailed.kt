@@ -10,7 +10,7 @@ class CouponApplyFailed : OrderSagaState {
         saga.publishEvent(
             OrderTopic.STOCK_ROLLBACK,
             saga.key,
-            CheckStockFailedEvent(saga.wineOrderList)
+            CheckStockFailedEvent(saga.orderId, saga.wineOrderList)
         ).awaitSingle()
     }
 }
