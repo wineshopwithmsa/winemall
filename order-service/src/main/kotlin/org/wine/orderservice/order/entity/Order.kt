@@ -18,6 +18,9 @@ class Order (
     @Column(name = "ORDER_ID", nullable = false)
     val orderId : Long = 0,
 
+    @Column(name = "MEMBER_ID", nullable = false)
+    var memberId : Long,
+
     @Column(name = "RECEIVER_PHONE_NUMBER", nullable = false)
     var receiverPhoneNumber: String,
 

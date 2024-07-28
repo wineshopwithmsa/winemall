@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.springframework.web.util.UriComponentsBuilder
+import org.wine.orderservice.Auth.service.AuthService
 import org.wine.orderservice.common.kafka.OrderTopic
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
@@ -38,7 +40,8 @@ import java.util.*
 class OrderService  @Autowired constructor(
     private val orderRepository: OrderRepository,
     private val transactionEventPublisher: TransactionEventPublisher,
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val authService: AuthService
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -119,8 +122,9 @@ class OrderService  @Autowired constructor(
 
 
     @Transactional
-    suspend fun createOrder(orderRequestDto: OrderRequestDto, rsrvDate : String){
-        var order : Order = orderRequestDto.toEntity(rsrvDate)
+    suspend fun createOrder(orderRequestDto: OrderRequestDto, rsrvDate : String, headers: HttpHeaders){
+        val memberId = authService.getMemberIdFromToken(headers)
+        var order : Order = orderRequestDto.toEntity(rsrvDate, memberId)
 
         orderRepository.save(
             order

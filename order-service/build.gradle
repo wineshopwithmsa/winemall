@@ -38,6 +38,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    //lib
+    implementation name: 'commonlib', version: '0.7', ext: 'jar'
 
     //db
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
