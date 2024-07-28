@@ -1,4 +1,4 @@
-package org.wine.orderservice.common.kafka.config
+package org.wine.userservice.common.kafka.config
 
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
@@ -9,23 +9,11 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.AcknowledgingMessageListener
 
-import org.wine.orderservice.common.kafka.listener.order.OrderCompletedEventListener
-import org.wine.orderservice.common.kafka.listener.order.OrderRollbackEventListener
-
 @Configuration
 class KafkaConsumerConfig(
     val kafkaProperties: KafkaProperties
 ) {
 
-    @Bean
-    fun orderCreationEventListenerContainerFactory(orderCompletedEventListener: OrderCompletedEventListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(orderCompletedEventListener)
-    }
-
-    @Bean
-    fun orderProductCheckFailedEventListenerContainerFactory(orderRollBackedEventListener: OrderRollbackEventListener): ConcurrentKafkaListenerContainerFactory<String, String> {
-        return kafkaListenerContainerFactory(orderRollBackedEventListener)
-    }
 
     fun kafkaListenerContainerFactory(listener: AcknowledgingMessageListener<String, String>): ConcurrentKafkaListenerContainerFactory<String, String> {
         val containerFactory = ConcurrentKafkaListenerContainerFactory<String, String>()
