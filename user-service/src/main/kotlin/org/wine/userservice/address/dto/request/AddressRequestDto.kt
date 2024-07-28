@@ -1,6 +1,5 @@
 package org.wine.userservice.address.dto.request
 
-import org.wine.userservice.user.dto.response.MemberDto
 import java.io.Serializable
 
 /**

@@ -6,4 +6,5 @@ import org.wine.userservice.address.entity.Address
 
 @Repository
 interface AddressRepository : JpaRepository<Address, Long> {
+    fun findByMemberUserId(userId: Long): List<Address>
 }
