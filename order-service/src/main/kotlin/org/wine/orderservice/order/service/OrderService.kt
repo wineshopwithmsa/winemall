@@ -84,7 +84,8 @@ class OrderService  @Autowired constructor(
 
 
     //쿠폰 적용가
-    suspend fun applyCoupon(originPrice : Int, couponId : Long): Int{
+    suspend fun applyCoupon(originPrice : Int, couponId : Long?): Int{
+        if(couponId == null) return originPrice
 
         var finalPrice : Int = originPrice
 
@@ -122,9 +123,9 @@ class OrderService  @Autowired constructor(
 
 
     @Transactional
-    suspend fun createOrder(orderRequestDto: OrderRequestDto, rsrvDate : String, headers: HttpHeaders){
+    suspend fun createOrder(orderRequestDto: OrderRequestDto, headers: HttpHeaders){
         val memberId = authService.getMemberIdFromToken(headers)
-        var order : Order = orderRequestDto.toEntity(rsrvDate, memberId)
+        var order : Order = orderRequestDto.toEntity( memberId)
 
         orderRepository.save(
             order
@@ -136,7 +137,7 @@ class OrderService  @Autowired constructor(
                         orderId = order.orderId,
                         wineOrderList = orderRequestDto.wineList,
                         couponId = orderRequestDto.couponId,
-                        memberId = orderRequestDto.memberId
+                        memberId = memberId
                     )
                 ).then(Mono.just(Unit))
                     .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}

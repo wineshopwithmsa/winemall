@@ -22,7 +22,7 @@ class OrderCompletedEventListener (
 ): AcknowledgingMessageListener<String, String>{
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @KafkaListener(topics = [OrderTopic.ORDER_COMPLETED], groupId = "order-orchestrator")
+    @KafkaListener(topics = [OrderTopic.ORDER_COMPLETED], groupId = "order")
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
         val (key, event) = data.key() to objectMapper.readValue(data.value(), OrderCompletedEvent::class.java)
         logger.info("Topic: ${OrderTopic.ORDER_COMPLETED}, key = $key, event: $event")

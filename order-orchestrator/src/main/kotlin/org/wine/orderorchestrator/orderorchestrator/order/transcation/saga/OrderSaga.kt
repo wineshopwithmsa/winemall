@@ -15,7 +15,7 @@ class OrderSaga private constructor(
     val orderId : Long,
     val memberId : Long,
     val wineOrderList : List<OrderDto>,
-    val couponId : Long,
+    val couponId : Long?,
     val key : String,
     var totalPrice: Int
 ){
