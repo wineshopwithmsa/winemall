@@ -40,7 +40,7 @@ class Order (
     var finalPrice : Int,
 
     @Column(name = "RSRV_DATE", nullable = true)
-    var rsrvDate: String,
+    var rsrvDate: String? = null,
 
     @Column(name = "STATUS", nullable = false)
     @Enumerated(EnumType.ORDINAL)

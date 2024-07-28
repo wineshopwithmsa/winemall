@@ -30,11 +30,11 @@ data class OrderRequestDto(
 
     val wineList : List<OrderDto>,
 
-    val rsrvDate: String,
+    val rsrvDate: String? = null,
 
-    val couponId : Long
+    val couponId : Long? = null
 ){
-    fun toEntity(rsrvDate : String, memberId: Long) : Order {
+    fun toEntity(memberId: Long) : Order {
         return Order(
             receiverPhoneNumber = receiverPhoneNumber,
             receiverName = receiverName,

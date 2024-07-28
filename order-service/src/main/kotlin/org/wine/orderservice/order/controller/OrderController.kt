@@ -53,9 +53,8 @@ class OrderController @Autowired constructor(
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
     suspend fun orderWine(@Valid @RequestBody orderRequestDto: OrderRequestDto,
-                          @RequestParam(required = false, defaultValue = "") rsrvDate: String,
                           @RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
-        orderService.createOrder(orderRequestDto, rsrvDate, headers)
+        orderService.createOrder(orderRequestDto, headers)
 
         return ApiResponse.Success(HttpStatus.OK.value(), message = "success")
     }

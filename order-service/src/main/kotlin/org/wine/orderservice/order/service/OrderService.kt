@@ -123,9 +123,9 @@ class OrderService  @Autowired constructor(
 
 
     @Transactional
-    suspend fun createOrder(orderRequestDto: OrderRequestDto, rsrvDate : String, headers: HttpHeaders){
+    suspend fun createOrder(orderRequestDto: OrderRequestDto, headers: HttpHeaders){
         val memberId = authService.getMemberIdFromToken(headers)
-        var order : Order = orderRequestDto.toEntity(rsrvDate, memberId)
+        var order : Order = orderRequestDto.toEntity( memberId)
 
         orderRepository.save(
             order

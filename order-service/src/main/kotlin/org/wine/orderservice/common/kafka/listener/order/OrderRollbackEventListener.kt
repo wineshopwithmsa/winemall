@@ -20,7 +20,7 @@ class OrderRollbackEventListener (
 ): AcknowledgingMessageListener<String, String> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @KafkaListener(topics = [OrderTopic.ORDER_FAILED], groupId = "order-orchestrator")
+    @KafkaListener(topics = [OrderTopic.ORDER_FAILED], groupId = "order")
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
         val (key, event) = data.key() to objectMapper.readValue(data.value(), OrderFailedEvent::class.java)
         logger.info("Topic: ${OrderTopic.ORDER_FAILED}, key = $key, event: $event")
