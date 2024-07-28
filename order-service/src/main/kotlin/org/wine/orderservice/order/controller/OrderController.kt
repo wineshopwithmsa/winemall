@@ -7,10 +7,12 @@ import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
@@ -44,14 +46,15 @@ class OrderController @Autowired constructor(
         ApiImplicitParam(name = "finalPrice", value = "할인 적용 금액", dataType = "Int", required = true),
         ApiImplicitParam(name ="rsrvDate", value = "예약일", dataType = "String", required = false),
         ApiImplicitParam(name = "wineList", value = "구매할 와인리스트", dataType = "List<OrderDto>", required = true),
-        ApiImplicitParam(name ="couponId", value = "적용할 쿠폰 ID", dataType = "Long", required = true),
-        ApiImplicitParam(name = "memberId", value = "고객 ID", dataType = "Long", required = true),
+        ApiImplicitParam(name ="couponId", value = "적용할 쿠폰 ID", dataType = "Long", required = true)
     ])
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-    suspend fun orderWine(@RequestBody orderRequestDto: OrderRequestDto, @RequestParam(required = false, defaultValue = "") rsrvDate: String) :ApiResponse<Any>{
-        orderService.createOrder(orderRequestDto, rsrvDate)
+    suspend fun orderWine(@RequestBody orderRequestDto: OrderRequestDto,
+                          @RequestParam(required = false, defaultValue = "") rsrvDate: String,
+                          @RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
+        orderService.createOrder(orderRequestDto, rsrvDate, headers)
 
         return ApiResponse.Success(HttpStatus.OK.value(), message = "success", data= null)
     }

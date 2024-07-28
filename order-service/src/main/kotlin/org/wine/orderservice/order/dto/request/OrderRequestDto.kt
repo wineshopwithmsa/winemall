@@ -21,7 +21,7 @@ data class OrderRequestDto(
     val couponId : Long,
     val memberId : Long
 ){
-    fun toEntity(rsrvDate : String) : Order {
+    fun toEntity(rsrvDate : String, memberId: Long) : Order {
         return Order(
             receiverPhoneNumber = receiverPhoneNumber,
             receiverName = receiverName,
@@ -31,6 +31,7 @@ data class OrderRequestDto(
             finalPrice = finalPrice,
             rsrvDate = rsrvDate,
             status = OrderStatus.ORDER_REQUEST,
+            memberId = memberId
         )
     }
 }
