@@ -5,12 +5,14 @@ import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.Chec
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.saga.OrderSaga
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.OrderTopic
 
-class CouponApplyFailed : OrderSagaState {
+class CouponApplyFailed(
+    val failureMessage: String
+) : OrderSagaState {
     override suspend fun operate(saga: OrderSaga) {
         saga.publishEvent(
             OrderTopic.STOCK_ROLLBACK,
             saga.key,
-            CheckStockFailedEvent(saga.orderId, saga.wineOrderList)
+            CheckStockFailedEvent(saga.orderId, saga.wineOrderList, failureMessage)
         ).awaitSingle()
     }
 }

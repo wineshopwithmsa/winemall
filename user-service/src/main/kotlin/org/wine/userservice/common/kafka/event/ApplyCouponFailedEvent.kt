@@ -1,4 +1,4 @@
-package org.wine.orderorchestrator.orderorchestrator.order.transcation.event
+package org.wine.userservice.common.kafka.event
 
 data class ApplyCouponFailedEvent(
     val orderId : Long,

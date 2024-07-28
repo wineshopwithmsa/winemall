@@ -37,7 +37,7 @@ class ApplyCouponFailedListener(
         sagaRepository.findById(key)?.let{
             boundedElasticScope.launch {
                it.changeStateAndOperate(
-                   CouponApplyFailed()
+                   CouponApplyFailed(event.failureMessage)
                )
             }
         }

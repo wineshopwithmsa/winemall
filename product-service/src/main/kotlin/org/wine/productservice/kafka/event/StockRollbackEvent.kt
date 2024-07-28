@@ -4,5 +4,6 @@ import org.wine.productservice.wine.dto.OrderDto
 
 data class StockRollbackEvent(
     val orderId : Long,
-    val wineOrderList : List<OrderDto>
+    val wineOrderList : List<OrderDto>,
+    val failureMessage: String
 )

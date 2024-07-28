@@ -5,12 +5,14 @@ import org.wine.orderorchestrator.orderorchestrator.order.transcation.event.Orde
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.saga.OrderSaga
 import org.wine.orderorchestrator.orderorchestrator.order.transcation.topic.OrderTopic
 
-class StockCheckFailed : OrderSagaState {
+class StockCheckFailed(
+    val failureMessage: String
+) : OrderSagaState {
     override suspend fun operate(saga: OrderSaga) {
         saga.publishEvent(
             OrderTopic.ORDER_FAILED,
             saga.key,
-            OrderFailedEvent(saga.orderId)
+            OrderFailedEvent(saga.orderId, failureMessage)
         ).awaitSingle()
     }
 }

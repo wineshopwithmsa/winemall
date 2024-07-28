@@ -32,7 +32,7 @@ class CheckStockFailedListener(
         sagaRepository.findById(key)?.let{
             boundedElasticScope.launch {
                 it.changeStateAndOperate(
-                    StockCheckFailed()
+                    StockCheckFailed(event.failureMessage)
                 )
             }
         }
