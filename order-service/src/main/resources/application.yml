@@ -54,3 +54,6 @@ eureka:
 uri:
     coupon-service: http://127.0.0.1:6010
     product-service:  http://127.0.0.1:6012
+
+webclient:
+  time-out : 5000
