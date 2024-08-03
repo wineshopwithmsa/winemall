@@ -1,11 +1,11 @@
 package org.wine.orderservice.order.dto.request
 
 
+import jakarta.persistence.Column
 import jakarta.validation.constraints.NotNull
-import org.wine.orderservice.order.dto.OrderDto
 import org.wine.orderservice.order.entity.Order
+import org.wine.orderservice.order.entity.OrderDetail
 import org.wine.orderservice.order.entity.OrderStatus
-import java.util.Date
 
 
 data class OrderRequestDto(
@@ -28,23 +28,23 @@ data class OrderRequestDto(
     @field:NotNull(message = "주문 최종 금액 입력은 필수입니다.")
     val finalPrice : Int,
 
-    val wineList : List<OrderDto>,
+    val wineList : List<OrderWineRequestDto>,
 
     val rsrvDate: String? = null,
 
     val couponId : Long? = null
 ){
-    fun toEntity(memberId: Long) : Order {
+    fun toOrder(memberId: Long, orderRequestDto: OrderRequestDto) : Order {
         return Order(
-            receiverPhoneNumber = receiverPhoneNumber,
-            receiverName = receiverName,
-            receiverAddr = receiverAddr,
-            receiverAddrDetail = receiverAddrDetail,
-            totalPrice = totalPrice,
-            finalPrice = finalPrice,
-            rsrvDate = rsrvDate,
+            memberId = memberId,
+            receiverPhoneNumber = orderRequestDto.receiverPhoneNumber,
+            receiverName = orderRequestDto.receiverName,
+            receiverAddr = orderRequestDto.receiverAddr,
+            receiverAddrDetail = orderRequestDto.receiverAddrDetail,
+            totalPrice = orderRequestDto.totalPrice,
+            finalPrice = orderRequestDto.finalPrice,
+            rsrvDate = orderRequestDto.rsrvDate,
             status = OrderStatus.ORDER_REQUEST,
-            memberId = memberId
         )
     }
 }

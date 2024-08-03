@@ -1,24 +1,16 @@
 package org.wine.orderservice.order.service
 
-import ApiResponse
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.reactive.function.BodyInserter
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
-import org.springframework.web.util.UriComponentsBuilder
 import org.wine.orderservice.Auth.service.AuthService
 import org.wine.orderservice.common.kafka.OrderTopic
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
@@ -27,21 +19,32 @@ import org.wine.orderservice.order.repository.OrderRepository
 import org.wine.orderservice.common.kafka.publisher.TransactionEventPublisher
 import org.wine.orderservice.common.kafka.event.OrderCreateEvent
 import org.wine.orderservice.order.WineSaleDto
-import org.wine.orderservice.order.dto.CouponDto
-import org.wine.orderservice.order.dto.DiscountType
-import org.wine.orderservice.order.dto.OrderDto
-import org.wine.orderservice.order.dto.Response
+import org.wine.orderservice.order.dto.*
+import org.wine.orderservice.order.dto.request.OrderWineRequestDto
 import org.wine.orderservice.order.dto.response.OrderPriceResponseDto
 import org.wine.orderservice.order.entity.Order
+import org.wine.orderservice.order.entity.OrderDetail
+import org.wine.orderservice.order.entity.OrderStatus
+import org.wine.orderservice.order.mapper.OrderDetailMapper
+import org.wine.orderservice.order.mapper.OrderMapper
+import org.wine.orderservice.order.repository.OrderDetailRepository
 import reactor.core.publisher.Mono
+import java.time.Instant
 import java.util.*
 
 @Service
 class OrderService  @Autowired constructor(
     private val orderRepository: OrderRepository,
+    private val orderDetailRepository: OrderDetailRepository,
+
+    private val orderMapper: OrderMapper,
+    private val orderDetailMapper: OrderDetailMapper,
+
     private val transactionEventPublisher: TransactionEventPublisher,
     private val webClient: WebClient,
-    private val authService: AuthService
+
+    private val authService: AuthService,
+
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -111,7 +114,6 @@ class OrderService  @Autowired constructor(
     }
 
     suspend fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto): OrderPriceResponseDto{
-
         val sumPrice = calculatePrice(orderPriceRequestDto)
         val finalPrice = applyCoupon(sumPrice, orderPriceRequestDto.couponId)
 
@@ -121,15 +123,34 @@ class OrderService  @Autowired constructor(
         )
     }
 
+    fun getOrderList(headers: HttpHeaders): List<OrderDto> {
+        val memberId = authService.getMemberIdFromToken(headers)
+        val orderList = orderRepository.findAllByMemberIdOrderByOrderIdDesc(memberId)
+
+        return orderList.stream()
+            .map{orderMapper.toOrderDto(it)}
+            .toList();
+    }
+
+
+    fun getOrderDetails(orderId : Long): OrderDto {
+        val order = orderRepository.findById(orderId)
+
+        return order.map {orderMapper.toOrderDto(it)}.get()
+    }
 
     @Transactional
-    suspend fun createOrder(orderRequestDto: OrderRequestDto, headers: HttpHeaders){
+    suspend fun createOrder(orderRequestDto: OrderRequestDto, headers: HttpHeaders): OrderDto{
         val memberId = authService.getMemberIdFromToken(headers)
-        var order : Order = orderRequestDto.toEntity( memberId)
+        val order : Order = orderRequestDto.toOrder(memberId, orderRequestDto)
 
-        orderRepository.save(
-            order
-        ).let{
+        val orderDetails : List<OrderDetail> = orderRequestDto.wineList.stream()
+            .map{
+                orderDetailMapper.toOrderDetail(it, order)
+            }.toList()
+
+        orderDetailRepository.saveAll(orderDetails)
+        orderRepository.save(order).let{
                 transactionEventPublisher.publishEvent(
                     topic = OrderTopic.ORDER_CREATED,
                     key = UUID.randomUUID().toString().replace("-", ""),
@@ -143,6 +164,8 @@ class OrderService  @Autowired constructor(
                     .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
             }
             .awaitSingle()
+
+        return orderMapper.toOrderDto(order)
     }
 
     @Transactional

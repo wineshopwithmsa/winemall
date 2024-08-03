@@ -2,11 +2,10 @@ package org.wine.orderservice.order.dto.request
 
 
 import jakarta.validation.constraints.Size
-import org.wine.orderservice.order.dto.OrderDto
 
 data class OrderPriceRequestDto(
 
     @field:Size(min = 1, message = "At least 1 order required")
-    val productList: List<OrderDto>,
+    val productList: List<OrderWineRequestDto>,
     val couponId : Long? = null
 )

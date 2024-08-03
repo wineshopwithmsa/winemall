@@ -6,16 +6,15 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
-import java.util.Date
 
 @Entity
-@Table(name = "ORDER_PRODUCT")
+@Table(name = "ORDERS")
 @Getter
 @EntityListeners(AuditingEntityListener::class)
 class Order (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ORDER_ID", nullable = false)
+    @Column(name = "ORDER_ID")
     val orderId : Long = 0,
 
     @Column(name = "MEMBER_ID", nullable = false)
@@ -52,8 +51,13 @@ class Order (
 
     @LastModifiedDate
     @Column(name = "UPDATED_AT", nullable = true)
-    var updatedAt: Instant? = null
+    var updatedAt: Instant = Instant.now(),
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    var orderDetails : List<OrderDetail> = mutableListOf()
+
 ){
+
     fun approve() {
         this.status = OrderStatus.ORDER_COMPLETED
     }

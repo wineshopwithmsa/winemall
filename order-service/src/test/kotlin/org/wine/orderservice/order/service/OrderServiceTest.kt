@@ -3,11 +3,10 @@ package org.wine.orderservice.order.service
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.wine.orderservice.order.dto.OrderDto
+import org.wine.orderservice.order.dto.request.OrderWineRequestDto
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.springframework.test.context.ActiveProfiles
 
@@ -24,8 +23,8 @@ class OrderServiceIntegrationTest {
         // Given
         val orderPriceRequestDto = OrderPriceRequestDto(
             productList = listOf(
-                OrderDto(wineSaleId = 1L, quantity = 2),
-                OrderDto(wineSaleId = 2L, quantity = 3)
+                OrderWineRequestDto(wineSaleId = 1L, quantity = 2),
+                OrderWineRequestDto(wineSaleId = 2L, quantity = 3)
             ),
             couponId = 123L
         )
