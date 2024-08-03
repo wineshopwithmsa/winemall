@@ -54,13 +54,37 @@ class OrderController @Autowired constructor(
     ])
     suspend fun orderWine(@Valid @RequestBody orderRequestDto: OrderRequestDto,
                           @RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
-        orderService.createOrder(orderRequestDto, headers)
+        val order = orderService.createOrder(orderRequestDto, headers)
 
-        return ApiResponse.Success(HttpStatus.OK.value(), message = "success")
+        return ApiResponse.Success(HttpStatus.OK.value(), message = "success", order)
     }
 
 
-    @GetMapping("/price")
+    @GetMapping("/v1")
+    @ApiOperation(value = "주문 리스트 조회")
+    @ApiResponses(value = [
+        io.swagger.annotations.ApiResponse(code=200, message = "성공")
+    ])
+     fun getOrderList(@RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
+        val orderList = orderService.getOrderList(headers)
+        return ApiResponse.Success(HttpStatus.OK.value(), message = "success", data = orderList)
+    }
+
+    @GetMapping("/v1/details")
+    @ApiOperation(value = "주문 상세 조회")
+    @ApiImplicitParams(value = [
+        ApiImplicitParam(name ="orderId", value = "주문번호", dataType = "String", required = true),
+    ])
+    @ApiResponses(value = [
+        io.swagger.annotations.ApiResponse(code=200, message = "성공")
+    ])
+    fun getOrderDetails(@RequestParam orderId: Long) :ApiResponse<Any>{
+        val orderDetail = orderService.getOrderDetails(orderId)
+
+        return ApiResponse.Success(HttpStatus.OK.value(), message = "success", orderDetail)
+    }
+
+    @GetMapping("/v1/price")
     @ApiOperation(value = "주문총금액, 쿠폰 적용가 조회")
     @ApiImplicitParams(value = [
         ApiImplicitParam(name ="productIdList", value = "구매하고자하는 상품의 ID list(필수)", dataType = "List<Long>", required = true),
