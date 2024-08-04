@@ -13,3 +13,7 @@ class RegionNotFoundException (message: String) : NotFoundException(message) {
 class WineNotFoundException (message: String) : NotFoundException(message) {
     constructor(wineId: Long) : this("Wine not found with id: $wineId")
 }
+
+class WineSaleNotFoundException (message: String) : NotFoundException(message) {
+    constructor(wineSaleId: Long) : this("Wine sale not found with id: $wineSaleId")
+}

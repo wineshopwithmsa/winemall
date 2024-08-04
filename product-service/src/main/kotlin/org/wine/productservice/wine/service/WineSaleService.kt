@@ -1,16 +1,16 @@
 package org.wine.productservice.wine.service
 
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.wine.productservice.auth.AuthService
 import org.wine.productservice.kafka.event.CheckStockEvent
 import org.wine.productservice.kafka.event.StockRollbackEvent
-import org.wine.productservice.wine.dto.WineSaleCreateRequestDto
-import org.wine.productservice.wine.dto.WineSaleDto
-import org.wine.productservice.wine.dto.WineSalesRequestDto
+import org.wine.productservice.wine.dto.*
+import org.wine.productservice.wine.exception.WineSaleNotFoundException
 import org.wine.productservice.wine.mapper.WineSaleMapper
+import org.wine.productservice.wine.repository.WineRepository
 import org.wine.productservice.wine.repository.WineSaleRepository
 import java.util.stream.Collectors
 
@@ -19,6 +19,7 @@ class WineSaleService @Autowired constructor(
     private val authService: AuthService,
     private val wineSaleMapper: WineSaleMapper,
     private val wineSaleRepository: WineSaleRepository,
+    private val wineRepository: WineRepository,
 ){
     fun getWineSales(requestDto: WineSalesRequestDto): List<WineSaleDto> {
         val wineSales = requestDto.ids?.takeIf { it.isNotEmpty() }?.let {
@@ -65,7 +66,6 @@ class WineSaleService @Autowired constructor(
         }
     }
 
-
     @Transactional
     fun addWineSale(requestDto: WineSaleCreateRequestDto, headers: HttpHeaders): WineSaleDto {
         val userId = authService.getAccountId(headers)
@@ -76,5 +76,24 @@ class WineSaleService @Autowired constructor(
         val savedWineSale = wineSaleRepository.save(wineSale)
 
         return wineSaleMapper.toWineSaleDto(savedWineSale)
+    }
+
+    @Transactional
+    fun updateWineSale(wineSaleId: Long, requestDto: WineSaleUpdateRequestDto): WineSaleDto {
+        validateWineUpdateRequestDto(requestDto)
+
+        val wineSale = wineSaleRepository.findById(wineSaleId)
+            .orElseThrow { WineSaleNotFoundException(wineSaleId) }
+
+        requestDto.price?.let { wineSale.price = it }
+        requestDto.saleStartTime?.let { wineSale.saleStartTime = it }
+        requestDto.saleEndTime?.let { wineSale.saleEndTime = it }
+
+        val savedWineSale = wineSaleRepository.save(wineSale)
+        return wineSaleMapper.toWineSaleDto(savedWineSale)
+    }
+
+    fun validateWineUpdateRequestDto(requestDto: WineSaleUpdateRequestDto) {
+
     }
 }

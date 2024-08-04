@@ -1,6 +1,6 @@
 package org.wine.productservice.wine.service
 
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.domain.Specification
@@ -14,9 +14,7 @@ import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.mapper.WinePaginationMapper
 import jakarta.persistence.criteria.Predicate
 import org.springframework.http.HttpHeaders
-import org.springframework.web.servlet.function.ServerRequest
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.mapper.WineSaleMapper
 import org.wine.productservice.wine.repository.*
 import javax.swing.plaf.synth.Region
 
@@ -24,22 +22,21 @@ import javax.swing.plaf.synth.Region
 class WineService @Autowired constructor(
     private val authService: AuthService,
     private val wineMapper: WineMapper,
-    private val wineSaleMapper: WineSaleMapper,
     private val winePaginationMapper: WinePaginationMapper,
 
     private val wineRepository: WineRepository,
     private val regionRepository: RegionRepository,
     private val categoryRepository: CategoryRepository,
     private val wineCategoryRepository: WineCategoryRepository,
-    private val wineSaleRepository: WineSaleRepository
 ) {
+    @Transactional(readOnly = true)
     fun getWine(wineId: Long): WineDto {
         var wine = wineRepository.findById(wineId)
             .orElseThrow { WineNotFoundException(wineId)}
         return wineMapper.toWineDto(wine)
     }
 
-
+    @Transactional(readOnly = true)
     fun getWines(
         page: Int,
         perPage: Int,
@@ -74,7 +71,7 @@ class WineService @Autowired constructor(
                     orElseThrow { InvalidRegionException(wineDto.regionId) }
         val categories = getCategoriesFromIds(wineDto.categoryIds)
         val wine = wineMapper.toWine(wineDto, region)
-        wine.registrantId = userId
+        wine.registrantId = 1L
         wine.tagWithCategories(categories)
 
         val savedWine = wineRepository.save(wine)
@@ -138,8 +135,7 @@ class WineService @Autowired constructor(
         requestDto.alcoholPercentage?.let { wine.alcoholPercentage = it }
 
         val savedWine = wineRepository.save(wine)
-        var res = wineMapper.toWineDto(savedWine)
-        return res
+        return wineMapper.toWineDto(savedWine)
     }
 
     fun validateWineUpdateRequestDto(requestDto: WineUpdateRequestDto) {
