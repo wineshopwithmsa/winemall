@@ -1,15 +1,12 @@
 package org.wine.productservice.wine.entity
 
-
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.Instant
 
 @Entity
 @Table(name = "category")
-@AllArgsConstructor
 class Category(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
