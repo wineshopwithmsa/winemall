@@ -2,7 +2,6 @@ package org.wine.productservice.wine.entity
 
 import java.time.Instant
 import jakarta.persistence.*
-import lombok.Getter
 import org.hibernate.annotations.ColumnDefault
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -11,7 +10,6 @@ import java.math.BigDecimal
 
 @Entity
 @Table(name = "wine")
-@Getter
 @EntityListeners(AuditingEntityListener::class)
 class Wine(
     @Id
