@@ -1,6 +1,7 @@
 package org.wine.userservice.user.service
 
 import ApiResponse
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -18,6 +19,7 @@ import org.wine.userservice.user.common.exception.CustomException
 import org.wine.userservice.user.common.exception.ErrorCode
 import org.wine.userservice.user.jwt.JwtService
 import org.wine.userservice.user.repository.MemberRepository
+import reactor.core.publisher.Mono
 
 @Service
 class MemberService @Autowired constructor(
@@ -27,7 +29,19 @@ class MemberService @Autowired constructor(
 ) {
     private val passwordEncoder = BCryptPasswordEncoder()
 
-    suspend fun signUp(userRequest: UserRequestDto): MemberResponseDto {
+//    suspend fun signUp(userRequest: UserRequestDto): MemberResponseDto {
+//        val userRole = createUserRole(userRequest.role)
+//        val encodedPassword = passwordEncoder.encode(userRequest.password ?: "")
+//        val user = Member(
+//            email = userRequest.email!!,
+//            password = encodedPassword,
+//            nickName = userRequest.nickName,
+//            roles = mutableSetOf(userRole)
+//        )
+//        val savedUser = memberRepository.save(user)
+//        return MemberResponseDto.fromResponseDtoUser(savedUser)
+//    }
+    fun signUp(userRequest: UserRequestDto): Mono<MemberResponseDto> {
         val userRole = createUserRole(userRequest.role)
         val encodedPassword = passwordEncoder.encode(userRequest.password ?: "")
         val user = Member(
@@ -36,8 +50,10 @@ class MemberService @Autowired constructor(
             nickName = userRequest.nickName,
             roles = mutableSetOf(userRole)
         )
-        val savedUser = memberRepository.save(user)
-        return MemberResponseDto.fromResponseDtoUser(savedUser)
+        return memberRepository.save(user)
+                .map { savedUser ->
+                    MemberResponseDto.fromResponseDtoUser(savedUser) // Ensure this method is correctly defined
+                }
     }
 
     fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
@@ -55,13 +71,23 @@ class MemberService @Autowired constructor(
         }
     }
 
-    suspend fun getUserInfo(memberId: Long): MemberResponseDto {
-        val userInfo = memberRepository.findById(memberId).orElseThrow {
-            CustomException(ErrorCode.USER_NOT_FOUND)
-        }
-        return MemberResponseDto.fromResponseDtoUser(userInfo)
-    }
+//    suspend fun getUserInfo(memberId: Long): MemberResponseDto {
+//        val userInfo = memberRepository.findById(memberId).orElseThrow {
+//            CustomException(ErrorCode.USER_NOT_FOUND)
+//        }
+//        return MemberResponseDto.fromResponseDtoUser(userInfo)
+//    }
 
+//    suspend fun getUserInfo(memberId: Long): MemberResponseDto {
+//        val userInfo = memberRepository.findById(memberId).awaitFirstOrNull()
+//            ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
+//        return MemberResponseDto.fromResponseDtoUser(userInfo)
+//    }
+    fun getUserInfo(memberId: Long): Mono<MemberResponseDto> {
+        return memberRepository.findById(memberId)
+            .switchIfEmpty(Mono.error(CustomException(ErrorCode.USER_NOT_FOUND)))
+            .map { userInfo -> MemberResponseDto.fromResponseDtoUser(userInfo) }
+    }
     private fun createUserRole(role: String): MemberRole {
         return MemberRole().apply {
             id = if (role == "ROLE_USER") 1 else 2
