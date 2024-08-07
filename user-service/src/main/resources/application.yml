@@ -3,11 +3,20 @@ server:
 spring:
   application:
     name: user-service
-  datasource:
-    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://ls-0c680c2adbc7c152941c70c39a18994bd30480ef.cpd3bfmvavpa.ap-northeast-2.rds.amazonaws.com:5432/userservice
+#    username: dbmasteruser
+#    password: testwinemall
+  r2dbc:
     url: jdbc:postgresql://ls-0c680c2adbc7c152941c70c39a18994bd30480ef.cpd3bfmvavpa.ap-northeast-2.rds.amazonaws.com:5432/userservice
     username: dbmasteruser
     password: testwinemall
+    pool:
+      initial-size: 100
+      max-size: 500
+      max-idle-time: 30m
+      validation-query: SELECT 1
   jpa:
     hibernate:
       ddl-auto: update
@@ -44,6 +53,7 @@ jwt:
   secret: 357638792F423F4428472B4B6250655368566D597133743677397A2443264629
   accesstoken:
     time: 864000000000000
+  refresh: refresh
 
 logging:
   level:

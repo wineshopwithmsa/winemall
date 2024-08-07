@@ -1,6 +1,8 @@
 package org.wine.userservice.membercoupon.dto.response
 
 import org.wine.userservice.membercoupon.entity.MemberCoupon
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -16,19 +18,21 @@ data class MemberCouponResponseDto(
     val usedTime: LocalDateTime = LocalDateTime.parse("9999-12-31T00:00:00")
 ) : Serializable{
     companion object {
-        fun mapToMemberCouponDto(memberCoupon: MemberCoupon): MemberCouponResponseDto {
-            return MemberCouponResponseDto(
+        fun mapToMemberCouponDtoEach(memberCoupon: MemberCoupon): Mono<MemberCouponResponseDto> {
+            return Mono.fromCallable { MemberCouponResponseDto(
                 memberCouponId = memberCoupon.memberCouponId,
                 couponId = memberCoupon.couponId,
                 isUsed = memberCoupon.isUsed,
                 issuedTime = memberCoupon.issuedTime,
                 expireTime = memberCoupon.expireTime,
                 usedTime = memberCoupon.usedTime
-            )
+            ) }
         }
 
-        fun mapToMemberCouponDto(memberCoupons: List<MemberCoupon>): List<MemberCouponResponseDto> {
-            return memberCoupons.map { mapToMemberCouponDto(it) }
+        fun mapToMemberCouponDto(memberCoupons: List<MemberCoupon>): Flux<MemberCouponResponseDto> {
+            return Flux.fromIterable(memberCoupons)
+                .flatMap { mapToMemberCouponDtoEach(it) }
+//            return memberCoupons.map { mapToMemberCouponDtoEach(it) }
         }
     }
 

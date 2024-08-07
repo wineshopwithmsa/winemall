@@ -15,27 +15,27 @@ class MemberCouponController(private val memberCouponService: MemberCouponServic
 
     @GetMapping("/v1/coupons")
     @MemberCouponApiSpec.GetMemberCoupons
-    fun getUserInfo():ApiResponse<Any> {
+    suspend fun getUserInfo():ApiResponse<Any> {
         return ApiResponse.Success(data = memberCouponService.getCoupons())
     }
     @GetMapping("/v1/each")
-    fun getUserInfo(@RequestParam("couponId") couponId: Long):ApiResponse<Any> {
+    suspend fun getUserInfo(@RequestParam("couponId") couponId: Long):ApiResponse<Any> {
 
         return ApiResponse.Success(data = memberCouponService.getCoupon(couponId))
     }
     @PostMapping("/v1/member/apply")
-    fun applyCouponMember(@RequestBody memberCouponApplyRequestDto: MemberCouponApplyRequestDto):ApiResponse<Any>{
+    suspend fun applyCouponMember(@RequestBody memberCouponApplyRequestDto: MemberCouponApplyRequestDto):ApiResponse<Any>{
         val appliedCoupon = memberCouponService.applyCouponMember(memberCouponApplyRequestDto)
         return ApiResponse.Success(message = "success", data = appliedCoupon)
     }
     @GetMapping("/v1/member/coupons")
-    fun getCouponMember(@RequestHeader headers: HttpHeaders):ApiResponse<Any>{
+    suspend fun getCouponMember(@RequestHeader headers: HttpHeaders):ApiResponse<Any>{
         val appliedMemberCoupons = memberCouponService.getCouponMember(headers)
         return ApiResponse.Success(message = "success", data = appliedMemberCoupons)
     }
 
     @PatchMapping("/v1/member/coupon/use")
-    fun useCouponMember(@RequestParam("memberCouponId") memberCouponId:Long):ApiResponse<Any>{
+    suspend fun useCouponMember(@RequestParam("memberCouponId") memberCouponId:Long):ApiResponse<Any>{
 //        memberCouponService.applyCouponMember(memberCouponApplyRequestDto)
         val updatedCoupon = memberCouponService.useCouponMember(memberCouponId)
         return ApiResponse.Success(message = "success",data=updatedCoupon)

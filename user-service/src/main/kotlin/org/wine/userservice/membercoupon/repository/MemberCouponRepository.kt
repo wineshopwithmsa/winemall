@@ -1,8 +1,11 @@
 package org.wine.userservice.membercoupon.repository
 
-import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import org.springframework.stereotype.Repository
 import org.wine.userservice.membercoupon.entity.MemberCoupon
+import reactor.core.publisher.Flux
 
-interface MemberCouponRepository : JpaRepository<MemberCoupon, Long> {
-    fun findByMemberUserId(userId: Long): List<MemberCoupon>
+@Repository
+interface MemberCouponRepository : ReactiveCrudRepository<MemberCoupon, Long> {
+    fun findByMemberUserId(userId: Long): Flux<MemberCoupon>
 }

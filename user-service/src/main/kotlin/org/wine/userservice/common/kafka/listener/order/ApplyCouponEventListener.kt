@@ -3,6 +3,7 @@ package org.wine.userservice.common.kafka.listener.order
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -29,29 +30,26 @@ class ApplyCouponEventListener(
     override fun onMessage(data: ConsumerRecord<String, String>, acknowledgment: Acknowledgment?) {
         val (key, event) = data.key() to objectMapper.readValue(data.value(), ApplyCouponEvent::class.java)
         logger.info("Topic: ${OrderTopic.APPLY_COUPON}, key = $key, event: $event")
-        try{
-            memberCouponService.useCouponMember(event.couponId)
 
-            transactionEventPublisher.publishEvent(
-                topic = OrderTopic.APPLY_COUPON_COMPLETED,
-                key = key,
-                event = ApplyCouponCompletedEvent(event.orderId)
-            )
-        }
-        catch (e: Exception){
-            logger.info("Check Stock Failed, error: "+ e.message)
+        runBlocking {
+            try {
+                memberCouponService.useCouponMember(event.couponId).awaitFirstOrNull()
 
-            transactionEventPublisher.publishEvent(
-                topic = OrderTopic.APPLY_COUPON_FAILED,
-                key = key,
-                event = ApplyCouponFailedEvent(event.orderId, e.message!!)
-            )
-        }.let{
-            boundedElasticScope.launch {
-                it.awaitFirstOrNull()
+                transactionEventPublisher.publishEvent(
+                    topic = OrderTopic.APPLY_COUPON_COMPLETED,
+                    key = key,
+                    event = ApplyCouponCompletedEvent(event.orderId)
+                )
+            } catch (e: Exception) {
+                logger.info("Check Stock Failed, error: " + e.message)
+
+                transactionEventPublisher.publishEvent(
+                    topic = OrderTopic.APPLY_COUPON_FAILED,
+                    key = key,
+                    event = ApplyCouponFailedEvent(event.orderId, e.message!!)
+                )
             }
         }
-
         acknowledgment?.acknowledge()
     }
 }

@@ -1,110 +1,89 @@
-package org.wine.userservice.security
-
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.AuthenticationProvider
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.authorization.AuthorizationDecision
-import org.springframework.security.config.Customizer
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer
-import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
-import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext
-import org.springframework.security.web.util.matcher.IpAddressMatcher
-import org.wine.userservice.user.jwt.JwtAuthFilter
-import org.wine.userservice.user.service.UserDetailsServiceImpl
-import java.util.function.Supplier
-
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-class SecurityConfig {
-    @Autowired
-    var jwtAuthFilter: JwtAuthFilter? = null
-    @Bean
-    fun userDetailsService(): UserDetailsService {
-        return UserDetailsServiceImpl()
-    }
-
-
-    @Bean
-    @Throws(Exception::class)
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .csrf { csrf -> csrf.disable() }
-            .sessionManagement { sessionManagement ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }
-            .authorizeHttpRequests { authorizeRequests ->
-                authorizeRequests.anyRequest().permitAll()
-            }
-
-        return http.build()
-    }
-
-    private fun hasIpAddress(
-        authentication: Supplier<Authentication>,
-        `object`: RequestAuthorizationContext
-    ): AuthorizationDecision {
-        return AuthorizationDecision(ALLOWED_IP_ADDRESS_MATCHER.matches(`object`.request))
-    }
-
-    //    @Bean
-    //    protected SecurityFilterChain config(HttpSecurity http) throws Exception {
-    //        http.authorizeHttpRequests(authorize -> {
-    //            try {
-    //                authorize.anyRequest().permitAll();
-    ////                        .requestMatchers(WHITE_LIST).permitAll();
-    //            } catch (Exception e) {
-    //                e.printStackTrace();
-    //            }
-    //        })
-    //        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-    ////                .addFilter(getAuthenticationFilter());
-    //
-    //        return http.build();
-    //    }
-    @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
-
-    @Bean
-    fun authenticationProvider(): AuthenticationProvider {
-        val authenticationProvider = DaoAuthenticationProvider()
-        authenticationProvider.setUserDetailsService(userDetailsService())
-        authenticationProvider.setPasswordEncoder(passwordEncoder())
-        return authenticationProvider
-    }
-
-    @Bean
-    @Throws(Exception::class)
-    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
-        return config.authenticationManager
-    }
-
-    companion object {
-        const val ALLOWED_IP_ADDRESS: String = "0.0.0.0"
-        const val SUBNET: String = "/32"
-        val ALLOWED_IP_ADDRESS_MATCHER: IpAddressMatcher = IpAddressMatcher(ALLOWED_IP_ADDRESS + SUBNET)
-        const val IP_CHECK_PATH_PREFIX: String = "/user-service"
-
-        const val IP_CHECK_PATH_PATTERN: String = IP_CHECK_PATH_PREFIX + "/**"
-
-        private val WHITE_LIST = arrayOf(
-            "/**"
-        )
-    }
-}
+//package org.wine.userservice.security
+//
+//import org.springframework.beans.factory.annotation.Autowired
+//import org.springframework.context.annotation.Bean
+//import org.springframework.context.annotation.Configuration
+//import org.springframework.security.authentication.ReactiveAuthenticationManager
+//import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
+//import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+//import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+//import org.springframework.security.config.web.server.ServerHttpSecurity
+//import org.springframework.security.config.web.server.ServerHttpSecurity.AuthorizeExchangeSpec
+//import org.springframework.security.core.userdetails.ReactiveUserDetailsService
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+//import org.springframework.security.crypto.password.PasswordEncoder
+//import org.springframework.security.web.server.SecurityWebFilterChain
+//import org.springframework.security.web.server.authorization.AuthorizationContext
+//import org.springframework.security.web.util.matcher.IpAddressMatcher
+//import org.springframework.web.server.ServerWebExchange
+//import reactor.core.publisher.Mono
+//
+//
+//@Configuration
+//@EnableWebFluxSecurity
+//@EnableReactiveMethodSecurity
+//class SecurityConfig {
+//    @Autowired
+//    var jwtAuthFilter: JwtAuthFilter? = null
+//
+////    @Bean
+////    fun userDetailsService(): ReactiveUserDetailsService? {
+////        return
+////    }
+//    @Bean
+//    fun userDetailsService(): ReactiveUserDetailsService{
+//        return userDetailsService()
+//    }
+//
+//    @Bean
+//    fun securityWebFilterChain(
+//        http: ServerHttpSecurity
+//    ): SecurityWebFilterChain {
+//        return http.authorizeExchange { exchanges: AuthorizeExchangeSpec ->
+//            exchanges
+//                .anyExchange().authenticated()
+//        }
+//            .build()
+//    }
+////    @Bean
+////    fun securityWebFilterChain(http: SecurityWebFilterChain): SecurityWebFilterChain {
+////        return http
+////            .csrf { csrf -> csrf.disable() }
+////            .authorizeExchange { authorize ->
+////                authorize.anyExchange().permitAll()
+////            }
+////            .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+////            .build()
+////    }
+//
+//    private fun hasIpAddress(
+//        exchange: ServerWebExchange,
+//        context: AuthorizationContext
+//    ): Mono<Boolean> {
+//        return Mono.just(ALLOWED_IP_ADDRESS_MATCHER.matches(exchange.request.remoteAddress?.address?.hostAddress))
+//    }
+//
+//    @Bean
+//    fun passwordEncoder(): PasswordEncoder {
+//        return BCryptPasswordEncoder()
+//    }
+//
+//    @Bean
+//    fun reactiveAuthenticationManager(): ReactiveAuthenticationManager {
+//        val authenticationManager = UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService())
+//        authenticationManager.setPasswordEncoder(passwordEncoder())
+//        return authenticationManager
+//    }
+//
+//    companion object {
+//        const val ALLOWED_IP_ADDRESS: String = "0.0.0.0"
+//        const val SUBNET: String = "/32"
+//        val ALLOWED_IP_ADDRESS_MATCHER: IpAddressMatcher = IpAddressMatcher(ALLOWED_IP_ADDRESS + SUBNET)
+//        const val IP_CHECK_PATH_PREFIX: String = "/user-service"
+//        const val IP_CHECK_PATH_PATTERN: String = IP_CHECK_PATH_PREFIX + "/**"
+//
+//        private val WHITE_LIST = arrayOf(
+//            "/**"
+//        )
+//    }
+//}

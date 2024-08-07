@@ -10,12 +10,12 @@ import org.wine.userservice.address.service.AddressService
 @RequestMapping("/api/address")
 class AddressController(private val addressService: AddressService) {
     @PostMapping("/v1")
-    fun addAddress(@RequestHeader headers: HttpHeaders,@RequestBody addressRequestDto: AddressRequestDto):ApiResponse<Any> {
+    suspend fun addAddress(@RequestHeader headers: HttpHeaders,@RequestBody addressRequestDto: AddressRequestDto):ApiResponse<Any> {
         val savedAddress = addressService.addAddress(addressRequestDto,headers)
         return ApiResponse.Success(data = savedAddress)
     }
     @GetMapping("/v1")
-    fun getAddress(@RequestHeader headers: HttpHeaders):ApiResponse<Any>{
+    suspend fun getAddress(@RequestHeader headers: HttpHeaders):ApiResponse<Any>{
         val adddress = addressService.getAddress(headers);
         return ApiResponse.Success(data = adddress)
     }

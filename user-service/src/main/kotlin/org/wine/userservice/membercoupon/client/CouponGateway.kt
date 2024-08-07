@@ -12,7 +12,7 @@ interface CouponGateway {
         consumes = ["application/json"],
 //        headers = ["requester-name=my-api-request"]
     )
-    fun getCoupons(): Map<String, Object>?
+    suspend fun getCoupons(): Map<String, Object>?
     @GetMapping("/api/coupon/v1/{couponId}")
     fun getCoupon(@PathVariable couponId: Long): Map<String, Object>?
 }

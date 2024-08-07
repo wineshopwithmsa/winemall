@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import org.wine.userservice.security.reactive.jwt.JwtService
 import org.wine.userservice.user.dto.response.JwtResponseDTO
 import org.wine.userservice.user.dto.request.RequestLoginUserDto
 import org.wine.userservice.user.dto.request.UserRequestDto
@@ -17,14 +18,14 @@ import org.wine.userservice.user.entity.Member
 import org.wine.userservice.user.entity.MemberRole
 import org.wine.userservice.user.common.exception.CustomException
 import org.wine.userservice.user.common.exception.ErrorCode
-import org.wine.userservice.user.jwt.JwtService
+//import org.wine.userservice.user.jwt.JwtService
 import org.wine.userservice.user.repository.MemberRepository
 import reactor.core.publisher.Mono
+import java.util.Arrays
 
 @Service
 class MemberService @Autowired constructor(
     private val memberRepository: MemberRepository,
-    private val authenticationManager: AuthenticationManager,
     private val jwtService: JwtService
 ) {
     private val passwordEncoder = BCryptPasswordEncoder()
@@ -56,19 +57,38 @@ class MemberService @Autowired constructor(
                 }
     }
 
-    fun toLogin(authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
-        val authentication = authenticateUser(authRequestDTO.email, authRequestDTO.password)
-        return if (authentication.isAuthenticated) {
-            val member = memberRepository.findByEmail(authRequestDTO.email)
-                ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
-            ApiResponse.Success(
-                data = JwtResponseDTO(
-                    accessToken = jwtService.generateToken(member.getUserId().toString())
-                )
+    fun toLogin(authRequestDTO: RequestLoginUserDto) {
+//        val authentication = authenticateUser(authRequestDTO.email, authRequestDTO.password)
+        val member = memberRepository.findByEmail(authRequestDTO.email)
+            ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
+
+        val roleNames: Array<String> = member.getRoles()
+            .map { it.name }
+            .toTypedArray()
+
+        ApiResponse.Success(
+            data = JwtResponseDTO(
+                accessToken = jwtService.accessToken(member.getUserId().toString(),10000,roleNames)
+//                    accessToken = jwtService.generateToken(member.getUserId().toString())
             )
-        } else {
-            throw CustomException(ErrorCode.INVALID_CREDENTIALS)
-        }
+        )
+//        return if (authentication.isAuthenticated) {
+//            val member = memberRepository.findByEmail(authRequestDTO.email)
+//                ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
+//
+//            val roleNames: Array<String> = member.getRoles()
+//                .map { it.name }
+//                .toTypedArray()
+//
+//            ApiResponse.Success(
+//                data = JwtResponseDTO(
+//                    accessToken = jwtService.accessToken(member.getUserId().toString(),10000,roleNames)
+////                    accessToken = jwtService.generateToken(member.getUserId().toString())
+//                )
+//            )
+//        } else {
+//            throw CustomException(ErrorCode.INVALID_CREDENTIALS)
+//        }
     }
 
 //    suspend fun getUserInfo(memberId: Long): MemberResponseDto {
@@ -95,9 +115,9 @@ class MemberService @Autowired constructor(
         }
     }
 
-    private fun authenticateUser(email: String, password: String): Authentication {
-        return authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(email, password)
-        )
-    }
+//    private fun authenticateUser(email: String, password: String): Authentication {
+//        return authenticationManager.authenticate(
+//            UsernamePasswordAuthenticationToken(email, password)
+//        )
+//    }
 }

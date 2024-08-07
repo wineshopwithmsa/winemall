@@ -43,8 +43,12 @@ class MemberController @Autowired constructor(
             ServerResponse.status(500).buildAndAwait()
         }
     }
-    @PostMapping("/v1/login")
-    fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+//    @PostMapping("/v1/login")
+//    fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+//        return memberService.toLogin(authRequestDTO)
+//    }
+    @PostMapping("/v2/login")
+    suspend fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto) {
         return memberService.toLogin(authRequestDTO)
     }
 //    @GetMapping("/v1/info")
