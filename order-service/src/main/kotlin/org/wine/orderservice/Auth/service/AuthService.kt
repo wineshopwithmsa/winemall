@@ -3,6 +3,7 @@ package org.wine.orderservice.Auth.service
 import jwt.JwtTokenProvider
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
+import org.wine.orderservice.common.exception.AuthenticationFailException
 
 @Service
 class AuthService{
@@ -17,10 +18,10 @@ class AuthService{
                 return jwtTokenProvider.getAccount(token).toLong()
              }
              else{
-                throw IllegalArgumentException("Invalid account ID")
+                throw AuthenticationFailException("Invalid account ID")
              }
          } catch (e: Exception) {
-            throw IllegalArgumentException("Invalid JWT")
+            throw AuthenticationFailException("Invalid JWT")
          }
     }
 }

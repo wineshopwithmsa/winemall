@@ -1,4 +1,4 @@
-package org.wine.orderservice.order
+package org.wine.orderservice.order.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.wine.orderservice.order.dto.CategoryDto

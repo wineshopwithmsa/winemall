@@ -53,7 +53,7 @@ class Order (
     @Column(name = "UPDATED_AT", nullable = true)
     var updatedAt: Instant = Instant.now(),
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = arrayOf(CascadeType.PERSIST))
     var orderDetails : List<OrderDetail> = mutableListOf()
 
 ){
