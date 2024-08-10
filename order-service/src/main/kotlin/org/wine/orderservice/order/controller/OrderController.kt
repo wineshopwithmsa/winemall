@@ -65,8 +65,11 @@ class OrderController @Autowired constructor(
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-     fun getOrderList(@RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
+     suspend fun getOrderList(@RequestHeader headers: HttpHeaders) :ApiResponse<Any>{
+
         val orderList = orderService.getOrderList(headers)
+            ?: return ApiResponse.Error(HttpStatus.NO_CONTENT.value(), message = "No value")
+
         return ApiResponse.Success(HttpStatus.OK.value(), message = "success", data = orderList)
     }
 
@@ -78,8 +81,9 @@ class OrderController @Autowired constructor(
     @ApiResponses(value = [
         io.swagger.annotations.ApiResponse(code=200, message = "성공")
     ])
-    fun getOrderDetails(@RequestParam orderId: Long) :ApiResponse<Any>{
+    suspend fun getOrderDetails(@RequestParam orderId: Long) :ApiResponse<Any>{
         val orderDetail = orderService.getOrderDetails(orderId)
+            ?: return ApiResponse.Error(HttpStatus.NO_CONTENT.value(), message = "No value")
 
         return ApiResponse.Success(HttpStatus.OK.value(), message = "success", orderDetail)
     }

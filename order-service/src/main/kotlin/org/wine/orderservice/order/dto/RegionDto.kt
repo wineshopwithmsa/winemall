@@ -1,4 +1,4 @@
-package org.wine.orderservice.order
+package org.wine.orderservice.order.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 

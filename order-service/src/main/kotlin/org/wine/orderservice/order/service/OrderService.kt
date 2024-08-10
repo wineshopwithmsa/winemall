@@ -1,35 +1,35 @@
 package org.wine.orderservice.order.service
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBodyOrNull
 import org.wine.orderservice.Auth.service.AuthService
+import org.wine.orderservice.common.exception.NoValueException
 import org.wine.orderservice.common.kafka.OrderTopic
+import org.wine.orderservice.common.kafka.event.OrderCreateEvent
+import org.wine.orderservice.common.kafka.publisher.TransactionEventPublisher
+import org.wine.orderservice.order.dto.CouponDto
+import org.wine.orderservice.order.dto.DiscountType
+import org.wine.orderservice.order.dto.OrderDto
 import org.wine.orderservice.order.dto.request.OrderPriceRequestDto
 import org.wine.orderservice.order.dto.request.OrderRequestDto
-import org.wine.orderservice.order.repository.OrderRepository
-import org.wine.orderservice.common.kafka.publisher.TransactionEventPublisher
-import org.wine.orderservice.common.kafka.event.OrderCreateEvent
-import org.wine.orderservice.order.WineSaleDto
-import org.wine.orderservice.order.dto.*
-import org.wine.orderservice.order.dto.request.OrderWineRequestDto
 import org.wine.orderservice.order.dto.response.OrderPriceResponseDto
 import org.wine.orderservice.order.entity.Order
 import org.wine.orderservice.order.entity.OrderDetail
-import org.wine.orderservice.order.entity.OrderStatus
 import org.wine.orderservice.order.mapper.OrderDetailMapper
 import org.wine.orderservice.order.mapper.OrderMapper
 import org.wine.orderservice.order.repository.OrderDetailRepository
+import org.wine.orderservice.order.repository.OrderRepository
+import org.wine.orderservice.order.webClient.CouponWebClient
+import org.wine.orderservice.order.webClient.ProductWebClient
 import reactor.core.publisher.Mono
-import java.time.Instant
 import java.util.*
 
 @Service
@@ -41,48 +41,30 @@ class OrderService  @Autowired constructor(
     private val orderDetailMapper: OrderDetailMapper,
 
     private val transactionEventPublisher: TransactionEventPublisher,
-    private val webClient: WebClient,
+    private val couponWebClient: CouponWebClient,
+    private val productWebClient: ProductWebClient,
 
     private val authService: AuthService,
 
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Value("\${uri.product-service}")
-    lateinit var productService: String
-
-    @Value("\${uri.coupon-service}")
-    lateinit var couponService: String
-
 
     //와인 가격 총합 금액
     suspend fun calculatePrice(orderPriceRequestDto: OrderPriceRequestDto): Int{
         val wineSaleIdsParam = orderPriceRequestDto.productList.map { it.wineSaleId }.joinToString(",")
-        val wineSaleWebClientResponse = webClient.get()
-            .uri("$productService/api/wine-sales/v1?ids=$wineSaleIdsParam")
-            .retrieve()
-            .awaitBodyOrNull<Response<List<WineSaleDto>>>() ?: throw Exception("Received null response")
+        val wines = productWebClient.getWineSaleInfo(wineSaleIdsParam).data
 
+        if(wines.isEmpty()){
+            throw NoValueException("No Wine Sale info error")
+        }
 
-        val wines : List<WineSaleDto> = wineSaleWebClientResponse.data
-        var sumPrice : Int = 0
-
-        orderPriceRequestDto
+        val priceMap = wines.associateBy({it.wineSaleId}, {it.price})
+        return orderPriceRequestDto
             .productList
-            .forEach{
-                val wineSaleId = it.wineSaleId
-                var winePrice = 0
-
-                wines.forEach{
-                    if(it.wineSaleId == wineSaleId){
-                        winePrice = it.price
-                    }
-                }
-
-                sumPrice += winePrice * it.quantity
+            .sumOf{ it ->
+                (priceMap[it.wineSaleId] ?: 0 )* it.quantity
             }
-
-        return sumPrice
     }
 
 
@@ -90,27 +72,27 @@ class OrderService  @Autowired constructor(
     suspend fun applyCoupon(originPrice : Int, couponId : Long?): Int{
         if(couponId == null) return originPrice
 
-        var finalPrice : Int = originPrice
-
-        val couponWebClientResponse = webClient.get()
-            .uri(couponService + "/api/coupon/v1/"+couponId)
-            .retrieve()
-            .awaitBodyOrNull<Response<CouponDto>>() ?: throw Exception("Received null response")
-
+        val couponWebClientResponse = couponWebClient.getCoupon(couponId.toString())
 
         if(couponWebClientResponse.status == HttpStatus.OK.value()){ //쿠폰이 존재하면 쿠폰 적용가 계산
             val coupon : CouponDto = couponWebClientResponse.data
-
-            if(coupon.discountType == DiscountType.AMOUNT){
-                finalPrice = originPrice - coupon.discountValue.toInt()
-            }
-            else{
-                finalPrice = originPrice * (100 - coupon.discountValue.toInt()) / 100
-            }
+            return calculateDiscountedPrice(originPrice, coupon)
         }
 
+        return originPrice
+    }
 
-        return finalPrice
+    fun calculateDiscountedPrice(originPrice: Int, coupon: CouponDto): Int{
+        return when(coupon.discountType){
+            DiscountType.AMOUNT-> {
+                val discountedPrice = originPrice - coupon.discountValue.toInt()
+                if (discountedPrice < 0) 0 else discountedPrice
+            }
+            DiscountType.PERCENTAGE ->{
+                val discountedPrice = originPrice * (100 - coupon.discountValue.toInt()) / 100
+                if (discountedPrice < 0) 0 else discountedPrice
+            }
+        }
     }
 
     suspend fun getOrderPrice(orderPriceRequestDto: OrderPriceRequestDto): OrderPriceResponseDto{
@@ -123,20 +105,33 @@ class OrderService  @Autowired constructor(
         )
     }
 
-    fun getOrderList(headers: HttpHeaders): List<OrderDto> {
-        val memberId = authService.getMemberIdFromToken(headers)
-        val orderList = orderRepository.findAllByMemberIdOrderByOrderIdDesc(memberId)
+    suspend fun getOrderList(headers: HttpHeaders): List<OrderDto>? {
+        val memberId = withContext(Dispatchers.IO) {
+            authService.getMemberIdFromToken(headers)
+        }
 
-        return orderList.stream()
-            .map{orderMapper.toOrderDto(it)}
-            .toList();
+        val orderList = withContext(Dispatchers.IO) {
+            orderRepository.findAllByMemberIdOrderByOrderIdDesc(memberId)
+        }
+
+        return if (orderList.isEmpty()) {
+            null
+        } else {
+            orderList.map { orderMapper.toOrderDto(it) }
+        }
+
     }
 
 
-    fun getOrderDetails(orderId : Long): OrderDto {
-        val order = orderRepository.findById(orderId)
-
-        return order.map {orderMapper.toOrderDto(it)}.get()
+    suspend fun getOrderDetails(orderId: Long): OrderDto? {
+        return withContext(Dispatchers.IO) {
+            val order = orderRepository.findById(orderId)
+            if (order.isPresent) {
+                orderMapper.toOrderDto(order.get())
+            } else {
+                null
+            }
+        }
     }
 
     @Transactional
@@ -144,39 +139,47 @@ class OrderService  @Autowired constructor(
         val memberId = authService.getMemberIdFromToken(headers)
         val order : Order = orderRequestDto.toOrder(memberId, orderRequestDto)
 
-        val orderDetails : List<OrderDetail> = orderRequestDto.wineList.stream()
-            .map{
-                orderDetailMapper.toOrderDetail(it, order)
-            }.toList()
+        withContext(Dispatchers.IO) {
+            orderRepository.save(order)
+            val orderDetails : List<OrderDetail> = orderRequestDto.wineList
+                .map{ orderDetailMapper.toOrderDetail(it, order) }
+            orderDetailRepository.saveAll(orderDetails)
+        }
 
-        orderDetailRepository.saveAll(orderDetails)
-        orderRepository.save(order).let{
-                transactionEventPublisher.publishEvent(
-                    topic = OrderTopic.ORDER_CREATED,
-                    key = UUID.randomUUID().toString().replace("-", ""),
-                    event = OrderCreateEvent(
-                        orderId = order.orderId,
-                        wineOrderList = orderRequestDto.wineList,
-                        couponId = orderRequestDto.couponId,
-                        memberId = memberId
-                    )
-                ).then(Mono.just(Unit))
-                    .also{println("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")}
-            }
-            .awaitSingle()
+        publishOrderCreatedEvent(order, orderRequestDto, memberId)
 
         return orderMapper.toOrderDto(order)
+    }
+
+
+    suspend fun publishOrderCreatedEvent(order: Order, orderRequestDto: OrderRequestDto, memberId: Long){
+        transactionEventPublisher.publishEvent(
+                topic = OrderTopic.ORDER_CREATED,
+                key = UUID.randomUUID().toString().replace("-", ""),
+                event = OrderCreateEvent(
+                    orderId = order.orderId,
+                    wineOrderList = orderRequestDto.wineList,
+                    couponId = orderRequestDto.couponId,
+                    memberId = memberId
+                )
+        ).awaitSingle()
+
+        logger.info("트랜잭션 요청 topic: ORDER_CREATED, orderId = ${order.orderId}")
     }
 
     @Transactional
     fun approveOrder(id: Long) {
         orderRepository.findByIdOrNull(id)
             ?.approve()
+
+        logger.info("트랜잭션 요청 topic: ORDER_APPROVED, orderId = ${id}")
     }
 
     @Transactional
     fun cancelOrder(id: Long) {
         orderRepository.findByIdOrNull(id)
             ?.cancel()
+
+        logger.info("트랜잭션 요청 topic: ORDER_CANCELED, orderId = ${id}")
     }
 }
