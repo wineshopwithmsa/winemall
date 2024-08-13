@@ -43,3 +43,18 @@ INSERT INTO public.wine_sale (wine_sale_id, seller_id, wine_id, registered_quant
                                                                                                                                                                                                     (8, 2, (SELECT wine_id FROM public.wine WHERE name = 'Sassicaia'), 120, 100, 20, 2, CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '6 days', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP, 125000),
                                                                                                                                                                                                     (9, 3, (SELECT wine_id FROM public.wine WHERE name = 'Opus One'), 90, 90, 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '7 days', CURRENT_TIMESTAMP, NULL, 185000),
                                                                                                                                                                                                     (10, 1, (SELECT wine_id FROM public.wine WHERE name = 'La Rioja Alta'), 60, 55, 5, 2, CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP, 95000);
+
+-- Category 테이블 시퀀스 업데이트
+SELECT setval('category_category_id_seq', (SELECT MAX(category_id) FROM category));
+
+-- Region 테이블 시퀀스 업데이트
+SELECT setval('region_region_id_seq', (SELECT MAX(region_id) FROM region));
+
+-- Wine 테이블 시퀀스 업데이트
+SELECT setval('wine_wine_id_seq', (SELECT MAX(wine_id) FROM wine));
+
+-- Wine_Category 테이블 시퀀스 업데이트
+SELECT setval('wine_category_wine_category_id_seq', (SELECT MAX(wine_category_id) FROM wine_category));
+
+-- Wine_Sale 테이블 시퀀스 업데이트
+SELECT setval('wine_sale_wine_sale_id_seq', (SELECT MAX(wine_sale_id) FROM wine_sale));

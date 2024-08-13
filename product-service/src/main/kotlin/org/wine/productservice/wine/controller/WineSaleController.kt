@@ -31,8 +31,21 @@ class WineSaleController @Autowired constructor(
         )
     }
 
+//    @GetMapping("/v1/{wineSaleId}")
+//    @WineApiSpec.GetWineSale
+//    fun getWineSales(@ModelAttribute requestDto: WineSalesRequestDto): ApiResponse<Any> {
+//        var wines = wineSaleService.getWineSales(requestDto)
+//
+//        return ApiResponse.Success(
+//            status = HttpStatus.OK.value(),
+//            message = "Success",
+//            data = wines
+//        )
+//    }
+
+
     @PostMapping("/v1")
-    @WineApiSpec.CreateWine
+    @WineApiSpec.CreateWineSale
     fun createWineSale(@Valid @RequestBody requestDto: WineSaleCreateRequestDto,
                        @RequestHeader headers: HttpHeaders
     ): ResponseEntity<ApiResponse<Any>> {
@@ -44,5 +57,16 @@ class WineSaleController @Autowired constructor(
                 message = "Created",
                 data = WineSaleResponse(wineSale)
             ))
+    }
+
+    @PatchMapping("/v1/{wineSaleId}")
+    @WineApiSpec.UpdateWineSale
+    fun updateWineSale(@Valid @PathVariable wineSaleId: Long, @RequestBody requestDto: WineSaleUpdateRequestDto): ApiResponse<Any> {
+        val wineSale = wineSaleService.updateWineSale(wineSaleId, requestDto)
+        return ApiResponse.Success(
+            status = HttpStatus.OK.value(),
+            message = "Success",
+            data = mapOf("wine" to wineSale)
+        )
     }
 }

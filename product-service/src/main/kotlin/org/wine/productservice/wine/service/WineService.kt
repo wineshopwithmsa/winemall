@@ -1,6 +1,6 @@
 package org.wine.productservice.wine.service
 
-import jakarta.transaction.Transactional
+import jakarta.persistence.criteria.JoinType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.domain.Specification
@@ -13,10 +13,11 @@ import org.wine.productservice.wine.exception.*
 import org.wine.productservice.wine.mapper.WineMapper
 import org.wine.productservice.wine.mapper.WinePaginationMapper
 import jakarta.persistence.criteria.Predicate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.http.HttpHeaders
-import org.springframework.web.servlet.function.ServerRequest
+import org.springframework.transaction.support.TransactionTemplate
 import org.wine.productservice.auth.AuthService
-import org.wine.productservice.wine.mapper.WineSaleMapper
 import org.wine.productservice.wine.repository.*
 import javax.swing.plaf.synth.Region
 
@@ -24,30 +25,37 @@ import javax.swing.plaf.synth.Region
 class WineService @Autowired constructor(
     private val authService: AuthService,
     private val wineMapper: WineMapper,
-    private val wineSaleMapper: WineSaleMapper,
     private val winePaginationMapper: WinePaginationMapper,
 
     private val wineRepository: WineRepository,
     private val regionRepository: RegionRepository,
     private val categoryRepository: CategoryRepository,
     private val wineCategoryRepository: WineCategoryRepository,
-    private val wineSaleRepository: WineSaleRepository
+    private val transactionTemplate: TransactionTemplate,
 ) {
-    fun getWine(wineId: Long): WineDto {
-        var wine = wineRepository.findById(wineId)
+    suspend fun getWine(wineId: Long): WineDto = withContext(Dispatchers.IO){
+        var wine = wineRepository.findByIdWithCategories(wineId)
             .orElseThrow { WineNotFoundException(wineId)}
-        return wineMapper.toWineDto(wine)
+
+        wineMapper.toWineDto(wine)
     }
 
-
-    fun getWines(
+    suspend fun getWines(
         page: Int,
         perPage: Int,
         regionIds: List<Long>? = null,
         categoryIds: List<Long>? = null
-    ): PaginatedWineResponseDto {
-        val pageable = PageRequest.of(page - 1, perPage)
-        val specification = Specification<Wine> { root, _, criteriaBuilder ->
+    ): PaginatedWineResponseDto = withContext(Dispatchers.IO) {
+        transactionTemplate.execute {
+            val pageable = PageRequest.of(page - 1, perPage)
+            val specification = createWineSpecification(regionIds, categoryIds)
+            val winesPage = wineRepository.findAll(specification, pageable)
+            winePaginationMapper.toPaginatedWineResponse(winesPage, "/api/wines")
+        } ?: throw IllegalStateException("Transaction failed to execute")
+    }
+
+    private fun createWineSpecification(regionIds: List<Long>?, categoryIds: List<Long>?): Specification<Wine> {
+        return Specification { root, _, criteriaBuilder ->
             val predicates = mutableListOf<Predicate>()
 
             regionIds?.let { ids ->
@@ -55,31 +63,38 @@ class WineService @Autowired constructor(
             }
 
             categoryIds?.let { ids ->
-                val joinWineCategory = root.join<Wine, WineCategory>("categories")
-                val joinCategory = joinWineCategory.join<WineCategory, Category>("category")
+                val joinWineCategory = root.join<Wine, WineCategory>("categories", JoinType.LEFT)
+                val joinCategory = joinWineCategory.join<WineCategory, Category>("category", JoinType.LEFT)
                 predicates.add(joinCategory.get<Long>("id").`in`(ids))
             }
 
             criteriaBuilder.and(*predicates.toTypedArray())
         }
-
-        val winesPage = wineRepository.findAll(specification, pageable)
-        return winePaginationMapper.toPaginatedWineResponse(winesPage, "/api/wines")
     }
 
-    @Transactional
-    fun addWine(wineDto: WineCreateRequestDto, headers: HttpHeaders): WineDto {
-        val userId = authService.getAccountId(headers)
-        val region = regionRepository.findById(wineDto.regionId).
-                    orElseThrow { InvalidRegionException(wineDto.regionId) }
-        val categories = getCategoriesFromIds(wineDto.categoryIds)
-        val wine = wineMapper.toWine(wineDto, region)
-        wine.registrantId = userId
-        wine.tagWithCategories(categories)
+    suspend fun addWine(wineDto: WineCreateRequestDto, headers: HttpHeaders): WineDto = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
+            transactionTemplate.execute { status ->
+                try {
+                    val userId = authService.getAccountId(headers)
+                    val region = regionRepository.findById(wineDto.regionId)
+                        .orElseThrow { InvalidRegionException(wineDto.regionId) }
 
-        val savedWine = wineRepository.save(wine)
+                    // suspend 함수를 직접 호출
+                    val categories = getCategoriesFromIds(wineDto.categoryIds)
 
-        return wineMapper.toWineDto(savedWine)
+                    val wine = wineMapper.toWine(wineDto, region)
+                    wine.registrantId = userId
+                    wine.tagWithCategories(categories)
+
+                    val savedWine = wineRepository.save(wine)
+                    wineMapper.toWineDto(savedWine)
+                } catch (e: Exception) {
+                    status.setRollbackOnly()
+                    throw e
+                }
+            } ?: throw RuntimeException("Transaction failed")
+        }
     }
 
     private fun getCategoriesFromIds(categoryIds: Set<Long>?): Set<Category> {
@@ -97,49 +112,54 @@ class WineService @Autowired constructor(
         return categories.toSet()
     }
 
-    @Transactional
-    fun updateWine(wineId: Long, requestDto: WineUpdateRequestDto): WineDto {
-        validateWineUpdateRequestDto(requestDto)
+    suspend fun updateWine(wineId: Long, requestDto: WineUpdateRequestDto): WineDto = withContext(Dispatchers.IO) {
+        transactionTemplate.execute { status ->
+            try {
+                validateWineUpdateRequestDto(requestDto)
 
-        val wine = wineRepository.findById(wineId)
-            .orElseThrow { WineNotFoundException(wineId) }
+                val wine = wineRepository.findById(wineId)
+                    .orElseThrow { WineNotFoundException(wineId) }
 
-        requestDto.categoryIds?.let { newCategoryIds ->
-            val newCategories = getCategoriesFromIds(newCategoryIds)
+                requestDto.categoryIds?.let { newCategoryIds ->
+                    val newCategories = getCategoriesFromIds(newCategoryIds)
 
-            // 기존 카테고리 중 새로운 카테고리 목록에 없는 것들 삭제
-            val categoriesToRemove = wine.categories.filter { existingCategory ->
-                newCategories.none { it.categoryId == existingCategory.category.categoryId }
-            }
-            wineCategoryRepository.deleteAll(categoriesToRemove)
-            wine.categories -= categoriesToRemove.toSet()
+                    // 기존 카테고리 중 새로운 카테고리 목록에 없는 것들 삭제
+                    val categoriesToRemove = wine.categories.filter { existingCategory ->
+                        newCategories.none { it.categoryId == existingCategory.category.categoryId }
+                    }
+                    wineCategoryRepository.deleteAll(categoriesToRemove)
+                    wine.categories -= categoriesToRemove.toSet()
 
-            newCategories.forEach { category ->
-                if (wine.categories.none { it.category.categoryId == category.categoryId }) {
-                    val newWineCategory = WineCategory(wine = wine, category = category)
-                    wine.categories += newWineCategory
+                    newCategories.forEach { category ->
+                        if (wine.categories.none { it.category.categoryId == category.categoryId }) {
+                            val newWineCategory = WineCategory(wine = wine, category = category)
+                            wine.categories += newWineCategory
+                        }
+                    }
                 }
+
+                requestDto.regionId?.let { regionId ->
+                    val region = regionRepository.findById(regionId)
+                        .orElseThrow { InvalidRegionException(regionId) }
+                    wine.region = region
+                }
+
+                requestDto.categoryIds?.let { newCategoryIds ->
+                    val newCategories = getCategoriesFromIds(newCategoryIds)
+                    wine.tagWithCategories(newCategories)
+                }
+
+                requestDto.name?.let { wine.name = it }
+                requestDto.description?.let { wine.description = it }
+                requestDto.alcoholPercentage?.let { wine.alcoholPercentage = it }
+
+                val savedWine = wineRepository.save(wine)
+                wineMapper.toWineDto(savedWine)
+            } catch (e: Exception) {
+                status.setRollbackOnly()
+                throw e
             }
-        }
-
-        requestDto.regionId?.let { regionId ->
-            val region = regionRepository.findById(regionId)
-                .orElseThrow { InvalidRegionException(regionId) }
-            wine.region = region
-        }
-
-        requestDto.categoryIds?.let { newCategoryIds ->
-            val newCategories = getCategoriesFromIds(newCategoryIds)
-            wine.tagWithCategories(newCategories)
-        }
-
-        requestDto.name?.let { wine.name = it }
-        requestDto.description?.let { wine.description = it }
-        requestDto.alcoholPercentage?.let { wine.alcoholPercentage = it }
-
-        val savedWine = wineRepository.save(wine)
-        var res = wineMapper.toWineDto(savedWine)
-        return res
+        } ?: throw RuntimeException("Transaction failed")
     }
 
     fun validateWineUpdateRequestDto(requestDto: WineUpdateRequestDto) {
@@ -161,6 +181,4 @@ class WineService @Autowired constructor(
             }
         }
     }
-
-
 }

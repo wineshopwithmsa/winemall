@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -26,6 +27,7 @@ import org.wine.productservice.shared.validator.ValidIds
 import org.wine.productservice.wine.dto.*
 import org.wine.productservice.wine.service.WineService
 import java.net.URI
+import java.util.concurrent.atomic.AtomicInteger
 
 @RestController
 @RequestMapping("/api/wines")
@@ -33,26 +35,18 @@ import java.net.URI
 class WineController @Autowired constructor(
     private val wineService: WineService,
 ){
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val counter = AtomicInteger(0)
+
     @GetMapping("/health")
     @Operation(summary = "Health Check", description = "서버 상태 확인")
-    fun health(): String {
-        return "ok";
+    suspend fun health(): String {
+        return "ok"
     }
-
-//    @PostMapping("/v1/sale")
-//    fun getWineSaleInfo(@RequestBody windIdList: List<WinePriceRequestDto>): ApiResponse<Any> {
-//        var wines = wineService.getWineSaleInfo(windIdList)
-//
-//        return ApiResponse.Success(
-//            status = HttpStatus.OK.value(),
-//            message = "Success",
-//            data = wines
-//        )
-//    }
 
     @PostMapping("/v1")
     @WineApiSpec.CreateWine
-    fun createWine(@Valid @RequestBody requestDto: WineCreateRequestDto,
+    suspend fun createWine(@Valid @RequestBody requestDto: WineCreateRequestDto,
                    @RequestHeader headers: HttpHeaders): ResponseEntity<ApiResponse<Any>> {
         val wine = wineService.addWine(requestDto, headers)
         val location = URI.create("/api/wines/v1/${wine.id}")  // 새로 생성된 와인의 URI를 생성합니다.
@@ -67,7 +61,7 @@ class WineController @Autowired constructor(
     @Validated
     @GetMapping("/v1")
     @WineApiSpec.GetWines
-    fun getWines(
+    suspend fun getWines(
         @Parameter(description = "페이지 번호", example = "1")
         @RequestParam(defaultValue = "1") @Min(1) page: Int,
 
@@ -79,7 +73,7 @@ class WineController @Autowired constructor(
 
         @Parameter(description = "카테고리 ID(복수 가능. 쉼표로 구분)", example = "1,2,3")
         @ValidIds(fieldName = "categoryId") @RequestParam(required = false) categoryId: String?,
-        ): ResponseEntity<ApiResponse<Any>> {
+        ): ApiResponse<Any> {
         val regionIds = regionId?.split(",")?.map { it.toLong() }
         val categoryIds = categoryId?.split(",")?.map { it.toLong() }
 
@@ -90,32 +84,37 @@ class WineController @Autowired constructor(
             categoryIds = categoryIds
         )
 
-        return ResponseEntity.ok(ApiResponse.Success(
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = WinesResponse(wines)
-        ))
+        )
     }
 
     @GetMapping("/v1/{wineId}")
     @WineApiSpec.GetWine
-    fun getWine(@PathVariable wineId:Long): ResponseEntity<ApiResponse<Any>> {
-        var wine = wineService.getWine(wineId)
-        return ResponseEntity.ok(ApiResponse.Success(
+    suspend fun getWine(@PathVariable wineId: Long): ApiResponse<Any>{
+        val requestId = counter.incrementAndGet()
+        logger.debug("Request $requestId: Started processing getWine for id $wineId on thread ${Thread.currentThread().name}")
+
+        val wine = wineService.getWine(wineId)  // wineService.getWine이 suspend 함수라고 가정
+        logger.debug("Request $requestId: Finished processing getWine for id $wineId on thread ${Thread.currentThread().name}")
+
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = WineResponse(wine)
-        ))
+        )
     }
 
     @PatchMapping("/v1/{wineId}")
     @WineApiSpec.UpdateWine
-    fun updateWine(@Valid @PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ResponseEntity<ApiResponse<Any>> {
+    suspend fun updateWine(@Valid @PathVariable wineId: Long, @RequestBody requestDto: WineUpdateRequestDto): ApiResponse<Any> {
         val wine = wineService.updateWine(wineId, requestDto)
-        return ResponseEntity.ok(ApiResponse.Success(
+        return ApiResponse.Success(
             status = HttpStatus.OK.value(),
             message = "Success",
             data = mapOf("wine" to wine)
-        ))
+        )
     }
 }

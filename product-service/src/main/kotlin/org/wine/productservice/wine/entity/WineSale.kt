@@ -1,9 +1,7 @@
 package org.wine.productservice.wine.entity
 
 import java.time.Instant
-import java.util.UUID
 import jakarta.persistence.*
-import lombok.Getter
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -24,7 +22,7 @@ class WineSale(
     val wineId: Long,
 
     @Column(name = "price", nullable = false)
-    val price: Int = 0,
+    var price: Int = 0,
 
     @Column(name = "registered_quantity")
     var registeredQuantity: Int = 0,
