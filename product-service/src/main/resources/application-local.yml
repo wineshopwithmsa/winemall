@@ -23,6 +23,8 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.web: DEBUG
+    org.apache.kafka: ERROR
+
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID} --- [%15.15t] %-40.40logger{39} : %m%n%wEx"
 

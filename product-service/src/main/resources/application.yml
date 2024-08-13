@@ -44,3 +44,8 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+
+management:
+  metrics:
+    enable:
+      all: true
