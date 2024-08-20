@@ -8,4 +8,5 @@ import org.wine.userservice.user.entity.Member
 interface MemberRepository : JpaRepository<Member, Long> {
     //    User findByUserId(String userId);
     fun findByEmail(email: String?): Member?
+    fun countByEmail(email: String?): Int
 }

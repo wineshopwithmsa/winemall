@@ -17,7 +17,7 @@ class AddressService(
     private val userCommon: UserCommon
 )  {
     @Transactional
-    fun addAddress(addressRequestDto: AddressRequestDto,headers: HttpHeaders):AddressResponseDto {
+    suspend fun addAddress(addressRequestDto: AddressRequestDto,headers: HttpHeaders):AddressResponseDto {
         val userId = userCommon.getJwtAccount(headers).toLong()
 
         val member = memberRepository.findById(userId)
@@ -36,7 +36,7 @@ class AddressService(
         return AddressResponseDto.mapToAddressResponseDto(savedAddress)
     }
 
-    fun getAddress(headers: HttpHeaders): List<AddressResponseDto> {
+    suspend fun getAddress(headers: HttpHeaders): List<AddressResponseDto> {
         val userId = userCommon.getJwtAccount(headers).toLong()
 
         val address = addressRepository.findByMemberUserId(userId)
