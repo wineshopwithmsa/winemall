@@ -18,7 +18,7 @@ class AddressService(
 )  {
     @Transactional
     suspend fun addAddress(addressRequestDto: AddressRequestDto,headers: HttpHeaders):AddressResponseDto {
-        val userId = userCommon.getJwtAccount(headers).toLong()
+        val userId = userCommon.getJwtAccount(headers)
 
         val member = memberRepository.findById(userId)
             .orElseThrow { IllegalArgumentException("Member not found") }

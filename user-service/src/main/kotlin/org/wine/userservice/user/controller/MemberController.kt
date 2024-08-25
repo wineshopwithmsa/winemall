@@ -5,9 +5,10 @@ import jakarta.validation.Valid
 import lombok.extern.slf4j.Slf4j
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.wine.userservice.common.annotation.CurrentUser
 import org.wine.userservice.user.common.UserCommon
 import org.wine.userservice.user.dto.request.RequestLoginUserDto
 import org.wine.userservice.user.dto.request.UserRequestDto
@@ -40,16 +41,19 @@ class MemberController @Autowired constructor (
 //    }
 
     @PostMapping("/v1/login")
-    suspend fun authenticateAndGetToken(@RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
+    @PreAuthorize("permitAll()")
+    override suspend fun toLogin(@Valid @RequestBody authRequestDTO: RequestLoginUserDto): ApiResponse<Any> {
         return memberService.toLogin(authRequestDTO)
     }
 
     @GetMapping("/v1/info")
-    suspend fun getUserInfo(@RequestHeader headers: HttpHeaders): ApiResponse<Any> {
-        val userId = userCommon.getJwtAccount(headers).toLong()
-        return ApiResponse.Success(data = memberService.getUserInfo(userId))
+    override suspend fun getUserInfo(@CurrentUser userId: Long): ApiResponse<MemberResponseDto> {
+        val getCurrentUserInfo = memberService.getUserInfo(userId)
+        return ApiResponse.Success(data = getCurrentUserInfo)
     }
-
-
-
+    @GetMapping("/v1/admin")
+    suspend fun testAdmin(@CurrentUser userId:Long):Any{
+        logger.info("userId  = {} ,",userId)
+        return "asd"
+    }
 }
