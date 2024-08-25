@@ -1,5 +1,6 @@
 ## ORDER FINITE STATE MACHINE
-![image](https://github.com/user-attachments/assets/48aaa92f-be5d-4c58-bf87-6e4074ff28c6)
+
+![image](https://github.com/user-attachments/assets/f21a2608-3059-4659-9a5d-eed000c37f03)
 
 
 - ODER_PENDING: 주문이 들어옴
