@@ -11,4 +11,5 @@ data class CouponResponseDTO(
     val discountType: DiscountType,
     val discountValue: Double,
     val expiryDate: LocalDateTime,
+    val cnt:Int
 )

@@ -9,9 +9,9 @@ spring:
     web-application-type: reactive
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ls-0c680c2adbc7c152941c70c39a18994bd30480ef.cpd3bfmvavpa.ap-northeast-2.rds.amazonaws.com:5432/productservice
-    username: dbmasteruser
-    password: testwinemall
+    url: jdbc:postgresql://localhost:5432/productservice
+    username: postgres
+    password: 123
   jpa:
     hibernate:
       ddl-auto: update

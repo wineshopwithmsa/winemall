@@ -1,9 +1,6 @@
 package org.wine.couponservice.coupon.entity
 
 import jakarta.persistence.*
-import org.wine.couponservice.coupon.dto.response.CouponResponseDTO
-import java.sql.Timestamp
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -28,9 +25,14 @@ data class Coupon(
     val discountValue: Double,
 
     @Column(name = "expiry_date", nullable = false)
-    var expiryDate: LocalDateTime = LocalDateTime.now()
+    var expiryDate: LocalDateTime = LocalDateTime.now(),
+
+    @Column(name="coupon_expire", nullable = false)
+    var cnt:Int,
+    @Column(name="is_issued")
+    var isIssued:Boolean = false
 ){
-    constructor() : this(0, "", "", DiscountType.PERCENTAGE, 0.0, LocalDateTime.now())
+//    constructor() : this(0, "", "", DiscountType.PERCENTAGE, 0.0, LocalDateTime.now())
 }
 
 enum class DiscountType {

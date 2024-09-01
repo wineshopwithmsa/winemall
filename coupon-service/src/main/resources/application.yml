@@ -2,13 +2,21 @@
 server:
   port: 6010
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+#  data:
+#    redis:
+#      cluster:
+#        nodes: 127.0.0.1:6379
   application:
     name: coupon-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ls-0c680c2adbc7c152941c70c39a18994bd30480ef.cpd3bfmvavpa.ap-northeast-2.rds.amazonaws.com:5432/couponservice
-    username: dbmasteruser
-    password: testwinemall
+    url: jdbc:postgresql://localhost:5432/couponservice
+    username: postgres
+    password: 123
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,6 +25,22 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: true
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    producer:
+      retries: 1
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+      group-id: order
+      auto-offset-reset: latest
+    listener:
+      ack-mode: manual
+      poll-timeout: 5000
+
 eureka:
   client:
     register-with-eureka: true
