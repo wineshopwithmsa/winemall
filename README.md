@@ -7,6 +7,12 @@ MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
 * CouponService:       쿠폰 관리
 <br><br>
 
+# 사용 기술
+* Language: Kotlin 1.9.24
+* Framework: Springboot 3.3.1
+* DB: postgresql
+* ORM: JPA
+
 # ERD
 ![wineshop (1)](https://github.com/user-attachments/assets/a33f33d0-b006-45fd-85b0-5a3fefd888da)
 
