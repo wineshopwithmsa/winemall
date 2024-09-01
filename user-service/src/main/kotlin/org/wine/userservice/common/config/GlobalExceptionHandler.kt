@@ -1,20 +1,41 @@
 package org.wine.userservice.common.config
 
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.ResponseBody
 import org.wine.userservice.common.response.ErrorResponse
-import org.wine.userservice.user.common.exception.CustomException
-
+import javax.validation.ConstraintViolationException
 @ControllerAdvice
 class GlobalExceptionHandler {
-    @ExceptionHandler(CustomException::class)
-    fun handleCustomExceptione(ex: CustomException): ResponseEntity<ErrorResponse> {
-        val errorCode = ex.errorCode
-        val errorResponse = ErrorResponse(errorCode.message,500,null)
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun handleValidationExceptions(ex: MethodArgumentNotValidException): ErrorResponse {
+        val errors: Map<String, String> = ex.bindingResult.fieldErrors
+            .associate { it.field to (it.defaultMessage ?: "Invalid value") }
+
+        return ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            message = "Validation failed",
+            errors = errors
+        )
     }
 
+    @ExceptionHandler(ConstraintViolationException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun handleConstraintViolation(ex: ConstraintViolationException): ErrorResponse {
+        val errors: Map<String, String> = ex.constraintViolations
+            .associate { it.propertyPath.toString() to it.message }
 
+        return ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            message = "Validation failed",
+            errors = errors
+        )
+    }
 }

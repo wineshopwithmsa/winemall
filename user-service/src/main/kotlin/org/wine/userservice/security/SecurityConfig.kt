@@ -7,14 +7,10 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.authorization.AuthorizationDecision
-import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer
-import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -22,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.util.matcher.IpAddressMatcher
 import org.wine.userservice.user.jwt.JwtAuthFilter
 import org.wine.userservice.user.service.UserDetailsServiceImpl
@@ -29,7 +26,7 @@ import java.util.function.Supplier
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig {
     @Autowired
     var jwtAuthFilter: JwtAuthFilter? = null
@@ -48,8 +45,12 @@ class SecurityConfig {
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
             .authorizeHttpRequests { authorizeRequests ->
-                authorizeRequests.anyRequest().permitAll()
+                authorizeRequests
+                    .requestMatchers("/**").permitAll() // 로그인 엔드포인트 허용
+                    .anyRequest().authenticated() // 나머지 요청은 인증 필요
             }
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+
 
         return http.build()
     }

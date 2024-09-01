@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import org.wine.userservice.user.service.CustomUserDetails
 import org.wine.userservice.user.service.UserDetailsServiceImpl
 import java.io.IOException
 
@@ -34,10 +35,11 @@ class JwtAuthFilter(
         }
 
         if (username != null && SecurityContextHolder.getContext().authentication == null) {
-            val userDetails: UserDetails? = userDetailsServiceImpl.loadUserByUsername(username)
+            val userDetails: CustomUserDetails? = userDetailsServiceImpl.loadUserByUsername(username)
             if (userDetails != null && jwtService.validateToken(token, userDetails)) {
                 val authenticationToken =
                     UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+
                 authenticationToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authenticationToken
             }

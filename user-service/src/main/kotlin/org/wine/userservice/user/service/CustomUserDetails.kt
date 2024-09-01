@@ -5,17 +5,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.wine.userservice.user.entity.Member
 
-class CustomUserDetails(byUsername: Member) : UserDetails {
-    private val username: String = byUsername.getEmail()
-    private val memberPassword: String = byUsername.getPassword()
+class CustomUserDetails(memberEach: Member) : UserDetails {
+    private val username: String = memberEach.getEmail()
+    private val memberPassword: String = memberEach.getPassword()
     private val grantedAuthorities: Collection<GrantedAuthority>
+    private val userId:Long = memberEach.getUserId()
 
     init {
         val auths: MutableList<GrantedAuthority> = ArrayList()
-        for (role in byUsername.getRoles()) {
+        for (role in memberEach.getRoles()) {
             auths.add(SimpleGrantedAuthority(role.name?.toUpperCase() ?: ""))
         }
         this.grantedAuthorities = auths
+    }
+    fun getUserId():Long{
+        return userId
     }
 
     override fun getAuthorities(): Collection<GrantedAuthority> {

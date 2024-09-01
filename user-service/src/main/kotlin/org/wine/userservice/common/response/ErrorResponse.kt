@@ -1,3 +1,7 @@
 package org.wine.userservice.common.response
 
-data class ErrorResponse(val message: String, val status: Int?, val code:String?)
+data class ErrorResponse(
+    val status: Int,
+    val message: String,
+    val errors: Map<String, String>? = null
+)

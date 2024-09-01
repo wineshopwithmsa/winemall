@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.wine.userservice.user.dto.request.RequestLoginUserDto
 import org.wine.userservice.user.dto.request.UserRequestDto
-import org.wine.userservice.user.dto.response.MemberResponseDto
 import org.wine.userservice.user.entity.Member
 import org.wine.userservice.user.entity.MemberRole
 import org.wine.userservice.user.jwt.JwtService
@@ -73,7 +71,7 @@ class MemberServiceTest {
         }
         every { authenticationManager.authenticate(any()) } returns authentication
         every { memberRepository.findByEmail(authRequestDTO.email) } returns member
-        every { jwtService.generateToken(any()) } returns "jwtToken"
+        every { jwtService.generateToken(any(), authentication) } returns "jwtToken"
 
         // when
         val result = memberService.toLogin(authRequestDTO)
