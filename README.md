@@ -7,6 +7,10 @@ MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
 * CouponService:       쿠폰 관리
 <br><br>
 
+# ERD
+![wineshop (1)](https://github.com/user-attachments/assets/a33f33d0-b006-45fd-85b0-5a3fefd888da)
+
+
 # 주문 서비스
 wineMall 프로젝트는 MSA 구조로 각 도메인은 각각의 DB를 바라보고 있기 때문에 주문 시, productService의 product table, CouponService의 coupon table의 데이터 일관성도 관리해야 한다.
 분산 트랜젝션을 적용하는 보편적인 방법으로는 Two Phase Commit Protocol(2PC), Saga Pattern이 존재하한다. 이 프로젝트에서는 로그 관리에 이정이 있으며 시나리오 변경에 용이한 Orchestration-Based SAGA 패턴 방식을 선택하였다.
