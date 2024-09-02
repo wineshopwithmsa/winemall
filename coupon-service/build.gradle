@@ -85,6 +85,7 @@ dependencies {
 
     //lgging
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.9")
+//    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
     //kotlin
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'

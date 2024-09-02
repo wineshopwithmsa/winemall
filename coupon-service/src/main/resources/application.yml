@@ -13,6 +13,10 @@ spring:
   application:
     name: coupon-service
   datasource:
+#    p6spy:
+#      enable-logging: true
+#      multiline: true
+#      logging: slf4j
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/couponservice
     username: postgres
@@ -22,9 +26,9 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        show_sql: true
         format_sql: true
         use_sql_comments: true
+    show-sql: true
   kafka:
     bootstrap-servers: 127.0.0.1:9092
     producer:
@@ -49,3 +53,7 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka #Eureka Server ??
   instance:
     instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+logging:
+  level:
+    org.hibernate.SQL: debug # logger에 출력하려면
+    org.hibernate.type.descriptor.sql: trace # 파라미터 값 출력

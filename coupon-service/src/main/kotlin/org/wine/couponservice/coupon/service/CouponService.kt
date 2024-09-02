@@ -1,5 +1,6 @@
 package org.wine.couponservice.coupon.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.wine.couponservice.common.service.RedisService
@@ -19,6 +20,7 @@ class CouponService(
     private val redisService: RedisService,
 
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val COUPON_KEY_PREFIX = "coupon:"
 
     fun createCoupon(couponRequestDTO: CouponRequestDTO): CouponResponseDTO {
@@ -95,6 +97,12 @@ class CouponService(
         val coupon = couponRepository.findByCouponCode(code)
         return coupon
     }
-
+    @Transactional
+    fun updateCouponInDatabase(couponCode: String) {
+        logger.info("couponCode = {}",couponCode)
+//        val coupon = couponRepository.findByCouponCode(couponCode);
+//        couponRepository.deleteById(coupon.couponId)
+        couponRepository.updateUserCouponByCode(couponCode.trim('"'))
+    }
 
 }

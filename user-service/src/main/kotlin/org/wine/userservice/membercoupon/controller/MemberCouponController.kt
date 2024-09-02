@@ -1,11 +1,13 @@
 package org.wine.userservice.membercoupon.controller
 
 import ApiResponse
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.*
 import org.wine.userservice.common.config.MemberCouponApiSpec
+import org.wine.userservice.common.utils.StringUtils
 import org.wine.userservice.membercoupon.dto.request.MemberCouponApplyRequestDto
 import org.wine.userservice.membercoupon.service.MemberCouponService
 
@@ -17,7 +19,7 @@ class MemberCouponController(
     private val memberCouponService: MemberCouponService,
     val kafkaTemplate: KafkaTemplate<String, String>
 ) {
-
+    private val logger = LoggerFactory.getLogger(javaClass)
     @GetMapping("/v1/coupons")
     @MemberCouponApiSpec.GetMemberCoupons
     fun getUserInfo():ApiResponse<Any> {
@@ -46,11 +48,11 @@ class MemberCouponController(
         return ApiResponse.Success(message = "success",data=updatedCoupon)
     }
 
+
     @PostMapping("/request-coupon/{num}")
     fun requestCoupon(@PathVariable num:Long): ResponseEntity<String> {
-//        kafkaTemplate.send("coupon-requests", )
-        for (userId in 0..num) {
-            kafkaTemplate.send("coupon-requests", userId.toString())
+        for (userId in 0..(num-1)) {
+            kafkaTemplate.send("coupon-requests", StringUtils.generateRandomString(5)+userId.toString())
         }
         return ResponseEntity.ok("Coupon request sent")
     }
