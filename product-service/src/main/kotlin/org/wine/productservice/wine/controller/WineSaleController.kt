@@ -9,7 +9,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.wine.productservice.config.WineApiSpec
-import org.wine.productservice.wine.dto.*
+import org.wine.productservice.wine.dto.WineSaleCreateRequestDto
+import org.wine.productservice.wine.dto.WineSaleResponse
+import org.wine.productservice.wine.dto.WineSaleUpdateRequestDto
+import org.wine.productservice.wine.dto.WineSalesRequestDto
 import org.wine.productservice.wine.service.WineSaleService
 import java.net.URI
 
@@ -21,7 +24,7 @@ class WineSaleController @Autowired constructor(
 ){
     @GetMapping("/v1")
     @WineApiSpec.GetWineSales
-    fun getWineSales(@ModelAttribute requestDto: WineSalesRequestDto): ApiResponse<Any> {
+    suspend fun getWineSales(@ModelAttribute requestDto: WineSalesRequestDto): ApiResponse<Any> {
         var wines = wineSaleService.getWineSales(requestDto)
 
         return ApiResponse.Success(
@@ -46,7 +49,7 @@ class WineSaleController @Autowired constructor(
 
     @PostMapping("/v1")
     @WineApiSpec.CreateWineSale
-    fun createWineSale(@Valid @RequestBody requestDto: WineSaleCreateRequestDto,
+    suspend fun createWineSale(@Valid @RequestBody requestDto: WineSaleCreateRequestDto,
                        @RequestHeader headers: HttpHeaders
     ): ResponseEntity<ApiResponse<Any>> {
         val wineSale = wineSaleService.addWineSale(requestDto, headers)
@@ -61,7 +64,7 @@ class WineSaleController @Autowired constructor(
 
     @PatchMapping("/v1/{wineSaleId}")
     @WineApiSpec.UpdateWineSale
-    fun updateWineSale(@Valid @PathVariable wineSaleId: Long, @RequestBody requestDto: WineSaleUpdateRequestDto): ApiResponse<Any> {
+    suspend fun updateWineSale(@Valid @PathVariable wineSaleId: Long, @RequestBody requestDto: WineSaleUpdateRequestDto): ApiResponse<Any> {
         val wineSale = wineSaleService.updateWineSale(wineSaleId, requestDto)
         return ApiResponse.Success(
             status = HttpStatus.OK.value(),

@@ -1,9 +1,7 @@
 package org.wine.couponservice.coupon.dto.request
 
-import org.wine.couponservice.coupon.entity.Coupon
-import java.time.LocalDate
-import java.time.LocalDateTime
 import org.wine.couponservice.coupon.entity.DiscountType
+import java.time.LocalDateTime
 
 
 data class CouponRequestDTO(
@@ -11,5 +9,6 @@ data class CouponRequestDTO(
     val description: String,
     val discountType: DiscountType,
     val discountValue: Double,
-    val expiryDate: LocalDateTime
+    val expiryDate: LocalDateTime,
+    val cnt:Int
 )
