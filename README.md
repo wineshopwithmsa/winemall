@@ -1,10 +1,6 @@
 # WineMall : 와인 쇼핑몰
 MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
-* UserService:         회원정보, 로그인, 회원가입 등을 관리
-* ProductService:      상품의 원산지, 수량 등의 정보 관리
-* OrderService:        상품 주문 및 예약, 주문내역 관리
-* Order-Orchestration: 상품 주문을 위한 분산 트랜잭션 관리
-* CouponService:       쿠폰 관리
+
 <br><br>
 
 # 사용 기술
@@ -14,9 +10,12 @@ MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
 * ORM: JPA
 
 # MSA 구조
-![제목 없는 다이어그램 drawio (3)](https://github.com/user-attachments/assets/f46c3bef-cf02-4188-b815-5d31150c23a3)
-
-
+![제목 없는 다이어그램 drawio (4)](https://github.com/user-attachments/assets/eb8f6405-203e-4624-b499-5056db764dd4)
+* UserService:         회원정보, 로그인, 회원가입 등을 관리
+* ProductService:      상품의 원산지, 수량 등의 정보 관리
+* OrderService:        상품 주문 및 예약, 주문내역 관리
+* Order-Orchestration: 상품 주문을 위한 분산 트랜잭션 관리
+* CouponService:       쿠폰 관리
 
 # ERD
 ![wineshop (1)](https://github.com/user-attachments/assets/a33f33d0-b006-45fd-85b0-5a3fefd888da)
