@@ -14,7 +14,8 @@ MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
 * ORM: JPA
 
 # MSA 구조
-![msa구조](https://github.com/user-attachments/assets/089aa7f5-29b3-4760-a0ce-83cf6406bb2c)
+![제목 없는 다이어그램 drawio (3)](https://github.com/user-attachments/assets/f46c3bef-cf02-4188-b815-5d31150c23a3)
+
 
 
 # ERD
