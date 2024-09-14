@@ -13,6 +13,10 @@ MSA 구조의 쇼핑몰로 와인을 판매, 예약하는 쇼핑몰 서비스
 * DB: postgresql
 * ORM: JPA
 
+# MSA 구조
+![msa구조](https://github.com/user-attachments/assets/089aa7f5-29b3-4760-a0ce-83cf6406bb2c)
+
+
 # ERD
 ![wineshop (1)](https://github.com/user-attachments/assets/a33f33d0-b006-45fd-85b0-5a3fefd888da)
 
